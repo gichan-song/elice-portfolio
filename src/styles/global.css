@@ -8,6 +8,9 @@
   --fs-2xl: 28px;
   --fs-3xl: 30px;
   --fs-4xl: 36px;
+
+  --main-bg-color: #ffffff;
+  --text-color: #767676;
 }
 
 .ellipsis {
