@@ -2,6 +2,7 @@ import { styled } from 'styled-components';
 import menuIcon from '../../../assets/icons/menu-icon.svg';
 import SideMenu from './../SideMenu/SideMenu';
 import useModal from '../../../hooks/useModal';
+import logo from '../../../assets/icons/logo.svg';
 
 const Header = () => {
   const [modalOpen, toggle, targetRef, contentRef] = useModal();
@@ -10,7 +11,7 @@ const Header = () => {
     <HeaderContainer>
       <MenuIcon src={menuIcon} alt='' onClick={toggle} ref={targetRef} />
       <h1>
-        <LogoImg src='' alt='' />
+        <LogoImg src={logo} alt='요리보고 로고' />
       </h1>
       <DummySpace></DummySpace>
       {modalOpen && <SideMenu contentRef={contentRef} />}
@@ -28,8 +29,9 @@ const HeaderContainer = styled.header`
   align-items: center;
   position: sticky;
   top: 0;
-  background: #ffcd3c;
+  background: var(--main-color);
   padding: 0 2rem;
+  z-index: 100;
 `;
 
 const MenuIcon = styled.img`
