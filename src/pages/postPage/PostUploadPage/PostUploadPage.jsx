@@ -259,7 +259,6 @@ const RecipeContainer = styled.div`
 `;
 
 const RecipeInputContainer = styled.div`
-  box-shadow: inset 0 0 10px red;
   display: flex;
   flex-direction: column;
   gap: 2rem;

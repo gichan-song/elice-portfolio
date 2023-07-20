@@ -28,7 +28,6 @@ const ScreenContainer = styled.div`
   flex-direction: column;
   padding: 3rem;
   min-width: 32rem;
-  box-shadow: inset 0 0 10px blue;
 
   @media (max-width: 360px) {
     padding: 1.5rem;
