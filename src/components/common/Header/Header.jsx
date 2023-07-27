@@ -11,7 +11,9 @@ const Header = () => {
     <HeaderContainer>
       <MenuIcon src={menuIcon} alt='' onClick={toggle} ref={targetRef} />
       <h1>
-        <LogoImg src={logo} alt='요리보고 로고' />
+        <a href='/'>
+          <LogoImg src={logo} alt='요리보고 로고' />
+        </a>
       </h1>
       <DummySpace></DummySpace>
       {modalOpen && <SideMenu contentRef={contentRef} />}

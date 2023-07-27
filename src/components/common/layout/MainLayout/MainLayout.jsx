@@ -1,12 +1,16 @@
 import styled from 'styled-components';
 import Header from '../../Header/Header';
+import TabMenu from '../../TabMenu/TabMenu';
 
 const MainLayout = ({ children }) => {
   return (
-    <MainContainer>
-      <Header />
-      <ScreenContainer>{children}</ScreenContainer>
-    </MainContainer>
+    <>
+      <MainContainer>
+        <Header />
+        <ScreenContainer>{children}</ScreenContainer>
+        <TabMenu />
+      </MainContainer>
+    </>
   );
 };
 
@@ -24,7 +28,7 @@ const MainContainer = styled.div`
 
 const ScreenContainer = styled.div`
   display: flex;
-  min-height: 100%;
+  min-height: calc(100vh - 11rem); // header(5rem), tabMenu(6rem) 높이를 제외한 값
   flex-direction: column;
   padding: 3rem;
   min-width: 32rem;
