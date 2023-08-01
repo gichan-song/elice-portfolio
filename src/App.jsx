@@ -1,6 +1,6 @@
 import GlobalStyle from './styles/GlobalStyle';
-import AuthContext from './components/context/AuthContext';
-import Router from './components/routes/Router';
+import AuthContext from './context/AuthContext';
+import Router from './routes/Router';
 import MainLayout from './components/common/layout/MainLayout/MainLayout';
 
 function App() {
