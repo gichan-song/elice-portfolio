@@ -169,8 +169,7 @@ const PostUploadPage = () => {
   return (
     <>
       <MainHeadingLayout MainheadingName='레시피 작성' />
-      <section>
-        <SubHeadingLayout subHeadingName='카테고리 선택 및 요리 소개' />
+      <SubHeadingLayout subHeadingName='카테고리 선택 및 요리 소개'>
         <RecipeContainer>
           <DropDownMenu getCategory={getCategory} />
           <RecipeInputContainer>
@@ -199,9 +198,8 @@ const PostUploadPage = () => {
             </ResultImgWrapper>
           </RecipeInputContainer>
         </RecipeContainer>
-      </section>
-      <section>
-        <SubHeadingLayout subHeadingName='조리 순서' />
+      </SubHeadingLayout>
+      <SubHeadingLayout subHeadingName='조리 순서'>
         <OrderInfoContainer>
           {orderInfos.map((orderInfo, index) => (
             <OrderInfo key={orderInfo.id}>
@@ -233,11 +231,13 @@ const PostUploadPage = () => {
             </OrderInfo>
           ))}
         </OrderInfoContainer>
-        <Figure onClick={handleAddOrderInfo}>
-          <PlusSquareImg src={plusSqureIcon} alt='추가하기 아이콘' />
-          <Figcaption>추가하기</Figcaption>
-        </Figure>
-      </section>
+        <AddBtn type='button' onClick={handleAddOrderInfo}>
+          <Figure>
+            <PlusSquareImg src={plusSqureIcon} alt='추가하기 아이콘' />
+            <Figcaption>추가하기</Figcaption>
+          </Figure>
+        </AddBtn>
+      </SubHeadingLayout>
       <ButtonWrapper>
         <Button type='cancel' onClickHandler={handleCancel}>
           취소 하기
@@ -265,6 +265,7 @@ const RecipeInputContainer = styled.div`
   width: 100%;
   height: 40rem;
   padding: 2rem;
+  border-radius: 1rem;
   background: var(--sub-bg-color);
 `;
 
@@ -408,13 +409,16 @@ const DeleteImg = styled.img`
 // [끝] 조리순서
 
 // [시작] 추가하기
+const AddBtn = styled.button`
+  display: block;
+  margin: 2rem auto 0;
+`;
+
 const Figure = styled.figure`
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 2rem;
-  cursor: pointer;
 `;
 
 const PlusSquareImg = styled.img`
@@ -434,5 +438,5 @@ const ButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
   gap: 3rem;
-  margin-top: 5rem;
+  margin-top: 2rem;
 `;
