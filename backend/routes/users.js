@@ -1,13 +1,9 @@
 const express = require('express'),
-  multer = require('multer'),
   mongoose = require('mongoose'),
   router = express.Router(),
-  path = require('path'),
-  fs = require('fs'),
   jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-// const local = require('../passport/strategies/local');
 
 // 회원가입 API
 router.post('/signup', (req, res) => {
@@ -40,7 +36,7 @@ router.post('/login', async (req, res) => {
       const payload = {
         _id: user._id,
         id: user.id,
-        name: user.name,
+        nickname: user.nickname,
       };
 
       jwt.sign(payload, 'secret', { expiresIn: '1h' }, (err, token) => {

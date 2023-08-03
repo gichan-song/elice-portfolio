@@ -1,7 +1,6 @@
 const express = require('express'),
   mongoose = require('mongoose'),
   router = express.Router(),
-  jwt = require('jsonwebtoken'),
   verifyToken = require('../middlewares/verifyToken'),
   User = require('../models/user');
 
@@ -20,25 +19,41 @@ router.post('/', verifyToken, async (req, res) => {
     orders: orderInfos,
     user: user,
   }).then((result) => {
-    console.log('post created');
+    res.json({ message: 'Post created' });
   });
 });
 
 router.get('/', async (req, res) => {
-  const posts = await Post.find({}, (err, posts) => {});
+  const posts = await Post.find({});
 
   res.json(posts);
 });
 
 router.get('/:postId', async (req, res) => {
   const { postId } = req.params;
-  const post = await Post.findOne({ _id: postId }, (err, post) => {});
+  const post = await Post.findOne({ _id: postId });
   res.json(post);
 });
 
 router.delete('/:postId', verifyToken, async (req, res) => {
   const { postId } = req.params;
-  await Post.deleteOne({ _id: postId }, (err, post) => {});
+  await Post.findByIdAndDelete(postId);
+  res.json({ message: 'Post deleted' });
+});
+
+router.put('/:postId', verifyToken, async (req, res) => {
+  const { postId } = req.params;
+  const { recipeIntro, orderInfos } = req.body;
+  const post = await Post.findOne({ _id: postId });
+
+  post.thumbnail = recipeIntro.image;
+  post.recipe = recipeIntro.content;
+  post.title = recipeIntro.title;
+  post.category = recipeIntro.category;
+  post.orders = orderInfos;
+
+  post.save();
+  res.json({ message: 'Post updated' });
 });
 
 module.exports = router;

@@ -5,6 +5,7 @@ const express = require('express'),
 
 const users = require('./routes/users');
 const posts = require('./routes/posts');
+const comments = require('./routes/comments');
 
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -29,6 +30,7 @@ app.use('/public', express.static('public'));
 
 app.use('/posts', posts);
 app.use('/users', users);
+app.use('/comments', comments);
 
 const port = process.env.PORT || 4000;
 const server = app.listen(port, () => {

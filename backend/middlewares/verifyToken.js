@@ -12,10 +12,6 @@ module.exports = (req, res, next) => {
       if (err) {
         res.status(403);
       } else {
-        res.json({
-          message: 'User authenticated...',
-          authData,
-        });
         next();
       }
     });
