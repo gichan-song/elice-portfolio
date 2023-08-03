@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useContext } from 'react';
 
 export const AuthContextStore = createContext({
   userToken: localStorage.getItem('token') || null,

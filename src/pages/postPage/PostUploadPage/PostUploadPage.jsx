@@ -21,7 +21,7 @@ const PostUploadPage = () => {
     content: '',
     image: '',
   });
-  console.log(recipeIntro);
+  // console.log(recipeIntro);
 
   // 조리 순서 정보
   const [orderInfos, setOrderInfos] = useState([
@@ -140,12 +140,17 @@ const PostUploadPage = () => {
   // 레시피 등록하기
   const handleRegister = () => {
     console.log('레시피 등록하기 버튼 로직이 들어갈 곳입니다.');
+    const accountname = localStorage.getItem('accountname');
     const option = {
-      url: 'http://localhost:3000/posts',
+      url: 'http://localhost:4000/posts',
       method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('token'),
+      },
       data: {
         recipeIntro: recipeIntro,
         orderInfos: orderInfos,
+        accountname: accountname,
       },
     };
 
