@@ -57,7 +57,7 @@ router.put('/:postId', verifyToken, async (req, res) => {
   res.json({ message: 'Post updated' });
 });
 
-router.put('/like/:postId', verifyToken, async (req, res) => {
+router.post('/like/:postId', verifyToken, async (req, res) => {
   const { postId } = req.params;
   const bearerHeader = req.headers['authorization'];
   let userInfo = '';
@@ -81,12 +81,13 @@ router.put('/like/:postId', verifyToken, async (req, res) => {
   const user = await User.findOne({ id: userInfo.id });
   const post = await Post.findById(postId);
 
-  const like = post.likes.find((like) => like.user === user._id);
+  console.log(user._id);
+
+  const like = post.likes.find((like) => like.user.toString() === user._id.toString());
   if (like) {
-    like.like = true;
+    post.likes.pull(like._id);
   } else {
-    console.log('unlike');
-    console.log(user._id);
+    post.likes.push({ user: user._id });
   }
 
   post.save();

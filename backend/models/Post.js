@@ -36,10 +36,6 @@ const postSchema = new Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
         },
-        like: {
-          type: Boolean,
-          default: false,
-        },
       }),
     ],
 

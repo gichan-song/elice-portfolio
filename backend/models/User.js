@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const UserSchema = new Schema(
   {
     _id: Schema.Types.ObjectId,
+    profileImg: {
+      type: String,
+    },
     id: {
       type: String,
     },
@@ -11,9 +14,6 @@ const UserSchema = new Schema(
       type: String,
     },
     password: {
-      type: String,
-    },
-    profileImg: {
       type: String,
     },
   },
