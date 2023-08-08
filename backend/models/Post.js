@@ -30,6 +30,19 @@ const postSchema = new Schema(
         date: String,
       }),
     ],
+    likes: [
+      new mongoose.Schema({
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        like: {
+          type: Boolean,
+          default: false,
+        },
+      }),
+    ],
+
     orders: [new mongoose.Schema({ id: String, content: String, orderImage: String })],
   },
 

@@ -14,7 +14,7 @@ app.use(express.urlencoded({ limit: '100mb', extended: false }));
 
 // MongoDB Configuration
 mongoose
-  .connect('mongodb://localhost:27017/recipe', { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect('mongodb://127.0.0.1:27017/recipe', { useNewUrlParser: true, useUnifiedTopology: true })
   .then((x) => {
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`);
   })

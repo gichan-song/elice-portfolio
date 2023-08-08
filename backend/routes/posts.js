@@ -2,7 +2,8 @@ const express = require('express'),
   mongoose = require('mongoose'),
   router = express.Router(),
   verifyToken = require('../middlewares/verifyToken'),
-  User = require('../models/user');
+  User = require('../models/user'),
+  jwt = require('jsonwebtoken');
 
 const Post = require('../models/Post');
 
@@ -54,6 +55,43 @@ router.put('/:postId', verifyToken, async (req, res) => {
 
   post.save();
   res.json({ message: 'Post updated' });
+});
+
+router.put('/like/:postId', verifyToken, async (req, res) => {
+  const { postId } = req.params;
+  const bearerHeader = req.headers['authorization'];
+  let userInfo = '';
+
+  if (typeof bearerHeader !== 'undefined') {
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+
+    jwt.verify(req.token, 'secret', (err, authData) => {
+      if (err) {
+        res.status(403);
+      } else {
+        userInfo = authData;
+      }
+    });
+  } else {
+    res.status(403);
+  }
+
+  const user = await User.findOne({ id: userInfo.id });
+  const post = await Post.findById(postId);
+
+  const like = post.likes.find((like) => like.user === user._id);
+  if (like) {
+    like.like = true;
+  } else {
+    console.log('unlike');
+    console.log(user._id);
+  }
+
+  post.save();
+
+  res.json(post.likes);
 });
 
 module.exports = router;

@@ -7,9 +7,9 @@ const User = require('../models/user');
 
 // 회원가입 API
 router.post('/signup', (req, res) => {
-  const { id, password, nickname } = req.body;
+  const { id, password, nickname, profileImg } = req.body;
 
-  User.create({ _id: new mongoose.Types.ObjectId(), id, password, nickname });
+  User.create({ _id: new mongoose.Types.ObjectId(), id, password, nickname, profileImg });
 
   res.json({ message: 'User created' });
 });
@@ -22,6 +22,17 @@ router.post('/validate/id/:id', async (req, res) => {
     res.status(409).json({ message: 'Id exists' });
   } else {
     res.json({ message: 'Id available' });
+  }
+});
+
+//닉네임 중복확인 API
+router.post('/validate/nickname/:nickname', async (req, res) => {
+  const { nickname } = req.params;
+
+  if (await User.exists({ nickname })) {
+    res.status(409).json({ message: 'Nickname exists' });
+  } else {
+    res.json({ message: 'Nickname available' });
   }
 });
 
