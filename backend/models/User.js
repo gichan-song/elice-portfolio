@@ -16,6 +16,12 @@ const UserSchema = new Schema(
     password: {
       type: String,
     },
+    scraps: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+      },
+    ],
   },
   { collection: 'users' },
   {

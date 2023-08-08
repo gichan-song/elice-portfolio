@@ -7,14 +7,7 @@ module.exports = (req, res, next) => {
     const bearer = bearerHeader.split(' ');
     const bearerToken = bearer[1];
     req.token = bearerToken;
-
-    jwt.verify(req.token, 'secret', (err, authData) => {
-      if (err) {
-        res.status(403);
-      } else {
-        next();
-      }
-    });
+    next();
   } else {
     res.status(403);
   }

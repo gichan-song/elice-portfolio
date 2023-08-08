@@ -4,6 +4,7 @@ const express = require('express'),
   jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
+const Post = require('../models/Post');
 
 // 회원가입 API
 router.post('/signup', (req, res) => {
@@ -36,6 +37,7 @@ router.post('/validate/nickname/:nickname', async (req, res) => {
   }
 });
 
+//로그인 API
 router.post('/login', async (req, res) => {
   const { id, password } = req.body;
   const user = await User.findOne({ id: id });
@@ -47,11 +49,12 @@ router.post('/login', async (req, res) => {
       const payload = {
         _id: user._id,
         id: user.id,
+        password: user.password,
         nickname: user.nickname,
       };
 
       jwt.sign(payload, 'secret', { expiresIn: '1h' }, (err, token) => {
-        res.json({ token: token, accountname: user.id });
+        res.json({ token: token });
       });
     } else {
       res.status(401).json({ message: 'Password is incorrect' });
@@ -59,12 +62,37 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/login', async (req, res) => {
-  const { id, password } = req.body;
+router.post('/scrap/:postId', async (req, res) => {
+  const { postId } = req.params;
 
-  const user = await User.findOne({ id: id }, (err, user) => {});
+  const bearerHeader = req.headers['authorization'];
+  let userInfo = '';
 
-  res.json(user);
+  if (typeof bearerHeader !== 'undefined') {
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+
+    jwt.verify(req.token, 'secret', (err, authData) => {
+      if (err) {
+        res.status(403);
+      } else {
+        userInfo = authData;
+      }
+    });
+  } else {
+    res.status(403);
+  }
+
+  const user = await User.findOne({ id: userInfo.id });
+
+  if (user.scraps.includes(postId)) {
+    user.scraps.pull(postId);
+  } else {
+    user.scraps.push(postId);
+  }
+
+  res.json(user.scraps);
 });
 
 module.exports = router;
