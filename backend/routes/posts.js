@@ -87,7 +87,7 @@ router.put('/:postId', verifyToken, (req, res) => {
 });
 
 //좋아요
-router.post('/like/:postId', verifyToken, (req, res) => {
+router.post('/:postId/like', verifyToken, (req, res) => {
   const { postId } = req.params;
 
   jwt.verify(req.token, 'secret', async (err, authData) => {
@@ -98,7 +98,6 @@ router.post('/like/:postId', verifyToken, (req, res) => {
 
       const like = post.likes.find((like) => like.user.toString() === authData._id.toString());
       if (like) {
-        console.log(like);
         post.likes.pull(like._id);
       } else {
         post.likes.push({ user: authData._id });
@@ -107,6 +106,40 @@ router.post('/like/:postId', verifyToken, (req, res) => {
       post.save();
 
       res.json(post.likes);
+    }
+  });
+});
+
+//댓글 작성
+router.post('/:postId/comments', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    if (err) res.status(403);
+
+    const { postId } = req.params;
+    const { comment } = req.body;
+    const post = await Post.findById(postId);
+
+    post.comments.push({ comment: comment, date: Date.now(), user: authData._id });
+
+    post.save();
+
+    res.json(post.comments);
+  });
+});
+
+//댓글 삭제
+router.delete('/:postId/comments/:commentId', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    if (err) res.status(403);
+
+    const { postId, commentId } = req.params;
+    const post = await Post.findById(postId);
+    const comment = post.comments.find((comment) => comment._id.toString() === commentId.toString());
+
+    if (comment.user.toString() === authData._id.toString()) {
+      post.comments.pull(comment._id);
+      post.save();
+      res.json(`commentId: ${commentId} deleted`);
     }
   });
 });
