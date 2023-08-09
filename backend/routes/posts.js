@@ -14,7 +14,7 @@ router.post('/', verifyToken, (req, res) => {
       res.status(403);
     } else {
       const { recipeIntro, orderInfos } = req.body;
-      const user = await User.findOne({ _id: authData._id });
+      const user = await User.findById(authData._id);
       if (user) {
         Post.create({
           _id: new mongoose.Types.ObjectId(),
@@ -52,10 +52,10 @@ router.delete('/:postId', verifyToken, (req, res) => {
     if (err) {
       res.status(403);
     }
-    const post = await Post.findOne({ user: authData._id });
-    if (post) {
-      const { postId } = req.params;
+    const { postId } = req.params;
+    const post = await Post.findById(postId);
 
+    if (post.user.toString() === authData._id) {
       await Post.findByIdAndDelete(postId);
       res.json(`postId: ${postId} deleted`);
     }
@@ -68,9 +68,9 @@ router.put('/:postId', verifyToken, (req, res) => {
     if (err) {
       res.status(403);
     }
-    const post = await Post.findOne({ user: authData._id });
-    if (post) {
-      const { postId } = req.params;
+    const { postId } = req.params;
+    const post = await Post.findById(postId);
+    if (post.user.toString() === authData._id) {
       const { recipeIntro, orderInfos } = req.body;
       const post = await Post.findOne({ _id: postId });
 
@@ -94,14 +94,14 @@ router.post('/like/:postId', verifyToken, (req, res) => {
     if (err) {
       res.status(403);
     } else {
-      const user = await User.findOne({ _id: authData._id });
       const post = await Post.findById(postId);
 
-      const like = post.likes.find((like) => like.user.toString() === user._id.toString());
+      const like = post.likes.find((like) => like.user.toString() === authData._id.toString());
       if (like) {
+        console.log(like);
         post.likes.pull(like._id);
       } else {
-        post.likes.push({ user: user._id });
+        post.likes.push({ user: authData._id });
       }
 
       post.save();
