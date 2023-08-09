@@ -36,9 +36,29 @@ router.post('/', verifyToken, (req, res) => {
 
 //레시피 전체
 router.get('/', async (req, res) => {
+  const countPerPage = parseInt(req.query.countperpage) || 10;
+  const pageNo = parseInt(req.query.pageno) || 1;
+
   const posts = await Post.find({});
 
-  res.json(posts);
+  if (pageNo > 0) {
+    const totalCount = posts.length;
+    let startItemNo = (pageNo - 1) * countPerPage;
+    let endItemNo = pageNo * countPerPage - 1;
+
+    if (endItemNo > totalCount - 1) {
+      endItemNo = totalCount - 1;
+    }
+    let postsPageList = [];
+    if (startItemNo < totalCount) {
+      for (let i = startItemNo; i <= endItemNo; i++) {
+        postsPageList.push(posts[i]);
+      }
+      res.json(postsPageList);
+    } else {
+      res.json(posts);
+    }
+  }
 });
 
 //레시피 상세
