@@ -11,24 +11,26 @@ const Post = require('../models/Post');
 router.post('/', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
-      res.status(403);
-    } else {
-      const { recipeIntro, orderInfos } = req.body;
-      const user = await User.findById(authData._id);
-      if (user) {
-        Post.create({
-          _id: new mongoose.Types.ObjectId(),
-          thumbnail: recipeIntro.image,
-          recipe: recipeIntro.content,
-          title: recipeIntro.title,
-          category: recipeIntro.category,
-          orders: orderInfos,
-          user: user,
-        }).then((result) => {
-          res.json({ message: 'Post created' });
-        });
-      }
+      res.status(403).json({ message: 'Login required' });
+      return;
     }
+    const { recipeIntro, orderInfos } = req.body;
+    const user = await User.findById(authData._id);
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
+    Post.create({
+      _id: new mongoose.Types.ObjectId(),
+      thumbnail: recipeIntro.image,
+      recipe: recipeIntro.content,
+      title: recipeIntro.title,
+      category: recipeIntro.category,
+      orders: orderInfos,
+      user: user,
+    }).then((result) => {
+      res.json({ message: 'Post created' });
+    });
   });
 });
 
@@ -50,15 +52,23 @@ router.get('/:postId', async (req, res) => {
 router.delete('/:postId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
-      res.status(403);
+      res.status(403).json({ message: 'Login required' });
+      return;
     }
     const { postId } = req.params;
     const post = await Post.findById(postId);
 
-    if (post.user.toString() === authData._id) {
-      await Post.findByIdAndDelete(postId);
-      res.json(`postId: ${postId} deleted`);
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
     }
+
+    if (post.user.toString() !== authData._id) {
+      res.status(401).json({ message: 'User not authorized' });
+      return;
+    }
+    await Post.findByIdAndDelete(postId);
+    res.json(`postId: ${postId} deleted`);
   });
 });
 
@@ -66,23 +76,25 @@ router.delete('/:postId', verifyToken, (req, res) => {
 router.put('/:postId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
-      res.status(403);
+      res.status(403).json({ message: 'Login required' });
+      return;
     }
     const { postId } = req.params;
     const post = await Post.findById(postId);
-    if (post.user.toString() === authData._id) {
-      const { recipeIntro, orderInfos } = req.body;
-      const post = await Post.findOne({ _id: postId });
-
-      post.thumbnail = recipeIntro.image;
-      post.recipe = recipeIntro.content;
-      post.title = recipeIntro.title;
-      post.category = recipeIntro.category;
-      post.orders = orderInfos;
-
-      post.save();
-      res.json({ message: 'Post updated' });
+    if (post.user.toString() !== authData._id) {
+      res.status(401).json({ message: 'User not authorized' });
+      return;
     }
+    const { recipeIntro, orderInfos } = req.body;
+
+    post.thumbnail = recipeIntro.image;
+    post.recipe = recipeIntro.content;
+    post.title = recipeIntro.title;
+    post.category = recipeIntro.category;
+    post.orders = orderInfos;
+
+    post.save();
+    res.json({ message: 'Post updated' });
   });
 });
 
@@ -92,34 +104,57 @@ router.post('/:postId/like', verifyToken, (req, res) => {
 
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
-      res.status(403);
-    } else {
-      const post = await Post.findById(postId);
-
-      const like = post.likes.find((like) => like.user.toString() === authData._id.toString());
-      if (like) {
-        post.likes.pull(like._id);
-      } else {
-        post.likes.push({ user: authData._id });
-      }
-
-      post.save();
-
-      res.json(post.likes);
+      res.status(403).json({ message: 'Login required' });
+      return;
     }
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+    const user = await User.findById(authData._id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    const like = post.likes.find((like) => like.user.toString() === authData._id.toString());
+    if (like) {
+      post.likes.pull(like._id);
+    } else {
+      post.likes.push({ user: authData._id });
+    }
+
+    post.save();
+
+    res.json(post.likes);
   });
 });
 
 //댓글 작성
 router.post('/:postId/comments', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
-    if (err) res.status(403);
-
+    if (err) {
+      res.status(403).json({ message: 'Login required' });
+      return;
+    }
     const { postId } = req.params;
     const { comment } = req.body;
     const post = await Post.findById(postId);
 
-    post.comments.push({ comment: comment, date: Date.now(), user: authData._id });
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+    const user = await User.findById(authData._id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    post.comments.push({ comment: comment, date: Date.now(), user: user });
 
     post.save();
 
@@ -130,17 +165,41 @@ router.post('/:postId/comments', verifyToken, (req, res) => {
 //댓글 삭제
 router.delete('/:postId/comments/:commentId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
-    if (err) res.status(403);
+    if (err) {
+      res.status(403).json({ message: 'Login required' });
+      return;
+    }
 
     const { postId, commentId } = req.params;
     const post = await Post.findById(postId);
+
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    const user = await User.findById(authData._id);
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
     const comment = post.comments.find((comment) => comment._id.toString() === commentId.toString());
 
-    if (comment.user.toString() === authData._id.toString()) {
-      post.comments.pull(comment._id);
-      post.save();
-      res.json(`commentId: ${commentId} deleted`);
+    if (!comment) {
+      res.status(404).json({ message: 'Comment not found' });
+      return;
     }
+
+    if (comment.user.toString() !== authData._id.toString()) {
+      res.status(401).json({ message: 'User not authorized' });
+      return;
+    }
+
+    post.comments.pull(comment._id);
+    post.save();
+    res.json(`comment ${commentId} deleted`);
   });
 });
 

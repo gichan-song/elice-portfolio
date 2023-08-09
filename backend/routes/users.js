@@ -5,6 +5,7 @@ const express = require('express'),
 
 const User = require('../models/user');
 const Post = require('../models/Post');
+const verifyToken = require('../middlewares/verifyToken');
 
 // 회원가입 API
 router.post('/signup', (req, res) => {
@@ -21,9 +22,9 @@ router.post('/validate/id/:id', async (req, res) => {
 
   if (await User.exists({ id })) {
     res.status(409).json({ message: 'Id exists' });
-  } else {
-    res.json({ message: 'Id available' });
+    return;
   }
+  res.json({ message: 'Id available' });
 });
 
 //닉네임 중복확인 API
@@ -32,9 +33,9 @@ router.post('/validate/nickname/:nickname', async (req, res) => {
 
   if (await User.exists({ nickname })) {
     res.status(409).json({ message: 'Nickname exists' });
-  } else {
-    res.json({ message: 'Nickname available' });
+    return;
   }
+  res.json({ message: 'Nickname available' });
 });
 
 //로그인 API
@@ -44,55 +45,55 @@ router.post('/login', async (req, res) => {
 
   if (!user) {
     res.status(401).json({ message: 'User not found' });
-  } else {
-    if (user.password === password) {
-      const payload = {
-        _id: user._id,
-        id: user.id,
-        password: user.password,
-        nickname: user.nickname,
-      };
-
-      jwt.sign(payload, 'secret', { expiresIn: '1h' }, (err, token) => {
-        res.json({ token: token });
-      });
-    } else {
-      res.status(401).json({ message: 'Password is incorrect' });
-    }
+    return;
   }
+  if (user.password !== password) {
+    res.status(401).json({ message: 'Password is incorrect' });
+    return;
+  }
+  const payload = {
+    _id: user._id,
+  };
+
+  jwt.sign(payload, 'secret', { expiresIn: '1h' }, (err, token) => {
+    res.json({ token: token });
+  });
 });
 
-router.post('/scrap/:postId', async (req, res) => {
-  const { postId } = req.params;
+router.post('/:postId', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    if (err) {
+      res.status(403).json({ message: 'Login required' });
+    }
 
-  const bearerHeader = req.headers['authorization'];
-  let userInfo = '';
+    const { postId } = req.params;
 
-  if (typeof bearerHeader !== 'undefined') {
-    const bearer = bearerHeader.split(' ');
-    const bearerToken = bearer[1];
-    req.token = bearerToken;
+    const user = await User.findById(authData._id);
 
-    jwt.verify(req.token, 'secret', (err, authData) => {
-      if (err) {
-        res.status(403);
-      } else {
-        userInfo = authData;
-      }
-    });
-  } else {
-    res.status(403);
-  }
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
 
-  const user = await User.findOne({ id: userInfo.id });
+    const post = await Post.findById(postId);
 
-  if (user.scraps.includes(postId)) {
-    user.scraps.pull(postId);
-  } else {
-    user.scraps.push(postId);
-  }
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
 
-  res.json(user.scraps);
+    const scrap = user.scraps.find((scrap) => scrap.post.toString() === postId.toString());
+
+    if (scrap) {
+      user.scraps.pull(scrap._id);
+    } else {
+      user.scraps.push({ post: post._id });
+    }
+
+    user.save();
+
+    res.json(user.scraps);
+  });
 });
 
 module.exports = router;

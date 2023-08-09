@@ -17,10 +17,12 @@ const UserSchema = new Schema(
       type: String,
     },
     scraps: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post',
-      },
+      new Schema({
+        post: {
+          type: Schema.Types.ObjectId,
+          ref: 'Post',
+        },
+      }),
     ],
   },
   { collection: 'users' },
