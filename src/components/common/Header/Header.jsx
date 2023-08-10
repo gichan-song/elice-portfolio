@@ -16,7 +16,7 @@ const Header = () => {
         </a>
       </h1>
       <DummySpace></DummySpace>
-      {modalOpen && <SideMenu contentRef={contentRef} />}
+      {modalOpen && <SideMenu contentRef={contentRef} toggle={toggle} />}
     </HeaderContainer>
   );
 };

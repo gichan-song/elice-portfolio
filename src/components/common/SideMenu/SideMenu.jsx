@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 const menuList = [
@@ -27,7 +28,9 @@ const menuList = [
   },
 ];
 
-const SideMenu = ({ contentRef }) => {
+const SideMenu = ({ contentRef, toggle }) => {
+  const navigate = useNavigate();
+
   // 사이드바 열렸을 때, 스크롤 막기
   useEffect(() => {
     document.body.style = `overflow: hidden`;
@@ -40,6 +43,22 @@ const SideMenu = ({ contentRef }) => {
     setExpandedMenu((prevExpandedMenu) => (prevExpandedMenu === menuName ? null : menuName));
   };
 
+  // 클릭 시, 가이드 페이지로 이동
+  const onClickMoveGuidePageHandler = () => {
+    toggle();
+    navigate('/guide');
+  };
+
+  // 클릭 시, 내 스크랩  / 뭐 먹을까? 페이지 이동
+  const onClickMoveScrapListPageHandler = (name) => {
+    toggle();
+    if (name === '내 스크랩') {
+      navigate('/profile');
+    } else if (name === '뭐 먹을까?') {
+      navigate('/game');
+    }
+  };
+
   return (
     <>
       <Aside ref={contentRef}>
@@ -47,13 +66,26 @@ const SideMenu = ({ contentRef }) => {
           <MainUl>
             {menuList.map((menu) => (
               <MainMenuLi key={menu.name}>
-                <MainMenuSpan onClick={() => handleMainMenuClick(menu.name)} $isExpanded={expandedMenu === menu.name}>
+                <MainMenuSpan
+                  onClick={() => {
+                    handleMainMenuClick(menu.name);
+                    !menu.subMenu && onClickMoveScrapListPageHandler(menu.name);
+                  }}
+                  $isExpanded={expandedMenu === menu.name}
+                >
                   {menu.name}
                 </MainMenuSpan>
                 {menu.subMenu && expandedMenu === menu.name && (
                   <SubUl>
                     {menu.subMenu.map((subMenu) => (
-                      <SubLi key={subMenu.name}>{subMenu.name}</SubLi>
+                      <SubLi
+                        key={subMenu.name}
+                        onClick={() => {
+                          onClickMoveGuidePageHandler();
+                        }}
+                      >
+                        {subMenu.name}
+                      </SubLi>
                     ))}
                   </SubUl>
                 )}
