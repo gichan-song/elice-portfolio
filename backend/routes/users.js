@@ -6,12 +6,14 @@ const express = require('express'),
 const User = require('../models/user');
 const Post = require('../models/Post');
 const verifyToken = require('../middlewares/verifyToken');
+const hashPassword = require('../utils/hash-password');
 
 // 회원가입 API
 router.post('/signup', (req, res) => {
   const { id, password, nickname, profileImg } = req.body;
+  const hashedPassword = hashPassword(password);
 
-  User.create({ _id: new mongoose.Types.ObjectId(), id, password, nickname, profileImg });
+  User.create({ _id: new mongoose.Types.ObjectId(), id, password: hashedPassword, nickname, profileImg });
 
   res.json({ message: 'User created' });
 });
@@ -47,7 +49,8 @@ router.post('/login', async (req, res) => {
     res.status(401).json({ message: 'User not found' });
     return;
   }
-  if (user.password !== password) {
+
+  if (user.password !== hashPassword(password)) {
     res.status(401).json({ message: 'Password is incorrect' });
     return;
   }
