@@ -7,7 +7,7 @@ const express = require('express'),
 
 const Post = require('../models/Post');
 
-// 레시피 등록
+// 레시피 등록 API
 router.post('/', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
@@ -34,7 +34,7 @@ router.post('/', verifyToken, (req, res) => {
   });
 });
 
-//레시피 전체
+//레시피 전체 목록 조회 API
 router.get('/', async (req, res) => {
   const countPerPage = parseInt(req.query.countperpage) || 10;
   const pageNo = parseInt(req.query.pageno) || 1;
@@ -61,14 +61,21 @@ router.get('/', async (req, res) => {
   }
 });
 
-//레시피 상세
+//레시피 검색 조회 API
+router.get('/search', async (req, res) => {
+  const { searchquery } = req.query;
+  const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } });
+  res.json(posts);
+});
+
+//레시피 상세 조회 API
 router.get('/:postId', async (req, res) => {
   const { postId } = req.params;
   const post = await Post.findOne({ _id: postId });
   res.json(post);
 });
 
-//레시피 삭제
+//레시피 삭제 API
 router.delete('/:postId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
@@ -92,7 +99,7 @@ router.delete('/:postId', verifyToken, (req, res) => {
   });
 });
 
-//레시피 수정
+//레시피 수정 API
 router.put('/:postId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
@@ -118,7 +125,7 @@ router.put('/:postId', verifyToken, (req, res) => {
   });
 });
 
-//좋아요
+//좋아요 API
 router.post('/:postId/like', verifyToken, (req, res) => {
   const { postId } = req.params;
 
@@ -152,7 +159,7 @@ router.post('/:postId/like', verifyToken, (req, res) => {
   });
 });
 
-//댓글 작성
+//댓글 작성 API
 router.post('/:postId/comments', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
@@ -182,7 +189,7 @@ router.post('/:postId/comments', verifyToken, (req, res) => {
   });
 });
 
-//댓글 삭제
+//댓글 삭제 API
 router.delete('/:postId/comments/:commentId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
