@@ -60,10 +60,69 @@ router.post('/login', async (req, res) => {
   });
 });
 
+// 프로필 조회 API
+router.get('/profile', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    if (err) {
+      res.status(403).json({ message: 'Login required' });
+      return;
+    }
+    const user = await User.findById(authData._id);
+
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
+
+    res.json({
+      id: user.id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+      scraps: user.scraps,
+    });
+  });
+});
+
+// 프로필 수정 API
+router.put('/profile', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    if (err) {
+      res.status(403).json({ message: 'Login required' });
+      return;
+    }
+
+    const { nickname, profileImg, currentpassword, changedpassword } = req.body;
+
+    const user = await User.findById(authData._id);
+
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
+    }
+    if (currentpassword !== user.password) {
+      res.status(401).json({ message: 'Password is incorrect' });
+      return;
+    }
+    user.nickname = nickname;
+    user.profileImg = profileImg;
+    user.password = changedpassword;
+
+    user.save();
+
+    res.json({
+      id: user.id,
+      nickname: user.nickname,
+      profileImg: user.profileImg,
+    });
+  });
+});
+
+// 스크랩 API
 router.post('/:postId', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
     if (err) {
       res.status(403).json({ message: 'Login required' });
+      return;
     }
 
     const { postId } = req.params;
