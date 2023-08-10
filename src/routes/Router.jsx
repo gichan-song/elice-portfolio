@@ -13,27 +13,31 @@ import PostUploadPage from '../pages/postPage/PostUploadPage/PostUploadPage';
 import PostDetailPage from '../pages/postPage/postDetailPage/PostDetailPage';
 import PostEditPage from '../pages/postPage/PostEditPage/PostEditPage';
 import ProfileSettingPage from '../pages/profileSettingPage/ProfileSettingPage';
+import GuidePage from '../pages/guidePage/GuidePage';
 
 const Router = () => {
-  const { userToken } = useContext(AuthContextStore);
+  const { token } = useContext(AuthContextStore);
 
   return (
     <Routes>
       <Route path='*' element={<NotFoundpage />} />
       <Route path='/notfound' element={<NotFoundpage />} />
       <Route path='/' element={<HomePage />} />
-      <Route path='/test' element={<TestPage />} />
-      <Route path='/post/:postid' element={<PostDetailPage />} />
-      <Route path='/post/edit/:postid' element={<PostEditPage />} />
-      <Route path='/profile/:nickname' element={<ProfileSettingPage />} />
+      {/* <Route path='/test' element={<TestPage />} /> */}
 
-      <Route element={<NonAuthRoute authenticated={userToken} />}>
+      <Route element={<NonAuthRoute authenticated={token} />}>
         <Route path='/login' element={<LoginPage />} />
         <Route path='/join' element={<JoinPage />} />
-        <Route path='/post' element={<PostUploadPage />} />
       </Route>
 
-      <Route element={<AuthRoute authenticated={userToken} />}></Route>
+      <Route element={<AuthRoute authenticated={token} />}>
+        <Route path='/post' element={<PostUploadPage />} />
+        <Route path='/post/:postid' element={<PostDetailPage />} />
+        <Route path='/post/edit/:postid' element={<PostEditPage />} />
+        {/* <Route path='/profile/:nickname' element={<ProfileSettingPage />} /> */}
+        <Route path='/profile' element={<ProfileSettingPage />} />
+        <Route path='/guide' element={<GuidePage />} />
+      </Route>
     </Routes>
   );
 };
