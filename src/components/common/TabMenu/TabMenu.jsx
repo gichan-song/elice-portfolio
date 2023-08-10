@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import homeIcon from '../../../assets/icons/home-icon.svg';
 import homeFillIcon from '../../../assets/icons/home-fill-icon.svg';
 import uploadIcon from '../../../assets/icons/upload-icon.svg';
@@ -7,43 +7,56 @@ import searchIcon from '../../../assets/icons/search-icon.svg';
 import searchFillIcon from '../../../assets/icons/search-fill-icon.svg';
 import userIcon from '../../../assets/icons/user-icon.svg';
 import userFillIcon from '../../../assets/icons/user-fill-icon.svg';
+import loginIcon from '../../../assets/icons/login-icon.svg';
+import loginFillIcon from '../../../assets/icons/login-fill-icon.svg';
 import { styled } from 'styled-components';
-import { useLocation, useNavigate } from 'react-router-dom';
-
-const MenuList = [
-  {
-    name: '홈',
-    move: '/',
-    nonActive: homeIcon,
-    active: homeFillIcon,
-  },
-  {
-    name: '글 작성',
-    move: '/post',
-    nonActive: uploadIcon,
-    active: uploadFillIcon,
-  },
-  {
-    name: '검색',
-    move: '/search',
-    nonActive: searchIcon,
-    active: searchFillIcon,
-  },
-  {
-    name: '프로필',
-    move: '/profile',
-    nonActive: userIcon,
-    active: userFillIcon,
-  },
-];
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { AuthContextStore } from '../../../context/AuthContext';
 
 const TabMenu = () => {
+  const { token } = useContext(AuthContextStore);
+
   const navigate = useNavigate();
-
   const location = useLocation();
-  // console.log(location.pathname);
 
-  const [selectedMenu, setSelectedMenu] = useState('홈');
+  // const nickname = 'test';
+
+  const MenuList = [
+    {
+      name: '홈',
+      path: '/',
+      nonActive: homeIcon,
+      active: homeFillIcon,
+    },
+    {
+      name: '글 작성',
+      path: '/post',
+      nonActive: uploadIcon,
+      active: uploadFillIcon,
+    },
+    {
+      name: '검색',
+      path: '/search',
+      nonActive: searchIcon,
+      active: searchFillIcon,
+    },
+    // 로그인 여부에 따라 다른 메뉴 구성
+    token
+      ? {
+          name: '프로필',
+          // path: `/profile/${nickname}`,
+          path: '/profile',
+          nonActive: userIcon,
+          active: userFillIcon,
+        }
+      : {
+          name: '로그인',
+
+          path: '/login',
+          nonActive: loginIcon,
+          active: loginFillIcon,
+        },
+  ];
 
   return (
     <>
@@ -53,12 +66,14 @@ const TabMenu = () => {
             <Li
               key={menu.name}
               onClick={() => {
-                setSelectedMenu(menu.name);
-                navigate(menu.move);
+                navigate(menu.path);
               }}
             >
-              <MenuImg src={selectedMenu === menu.name ? menu.active : menu.nonActive} alt={`${menu.name} 아이콘`} />
-              <MenuName $selectedMenu={selectedMenu === menu.name}>{menu.name}</MenuName>
+              <MenuImg
+                src={location.pathname === menu.path ? menu.active : menu.nonActive}
+                alt={`${menu.name} 아이콘`}
+              />
+              <MenuName $selectedMenu={location.pathname === menu.path}>{menu.name}</MenuName>
             </Li>
           ))}
         </Ul>
