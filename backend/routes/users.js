@@ -7,6 +7,7 @@ const User = require('../models/user');
 const Post = require('../models/Post');
 const verifyToken = require('../middlewares/verifyToken');
 const hashPassword = require('../utils/hash-password');
+const asynchandler = require('express-async-handler');
 
 // 회원가입 API
 router.post('/signup', (req, res) => {
@@ -86,6 +87,24 @@ router.get('/profile', verifyToken, (req, res) => {
   });
 });
 
+// 유저 검색 및 조회 API
+router.get(
+  '/search',
+  asynchandler(async (req, res) => {
+    const { nickname } = req.query;
+
+    const users = await User.find({ nickname: { $regex: nickname } });
+
+    res.json({
+      users: users.map((user) => ({
+        id: user.id,
+        nickname: user.nickname,
+        profileImg: user.profileImg,
+      })),
+    });
+  }),
+);
+
 // 프로필 수정 API
 router.put('/profile', verifyToken, (req, res) => {
   jwt.verify(req.token, 'secret', async (err, authData) => {
@@ -102,7 +121,7 @@ router.put('/profile', verifyToken, (req, res) => {
       res.status(401).json({ message: 'User not found' });
       return;
     }
-    if (currentpassword !== user.password) {
+    if (hashPassword(currentpassword) !== user.password) {
       res.status(401).json({ message: 'Password is incorrect' });
       return;
     }
@@ -110,7 +129,7 @@ router.put('/profile', verifyToken, (req, res) => {
     user.profileImg = profileImg;
 
     if (changedpassword !== '' && changedpassword !== undefined) {
-      user.password = changedpassword;
+      user.password = hashPassword(changedpassword);
     }
 
     user.save();

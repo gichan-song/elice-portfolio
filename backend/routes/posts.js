@@ -5,6 +5,7 @@ const express = require('express'),
   User = require('../models/user'),
   jwt = require('jsonwebtoken');
 
+const asynchandler = require('express-async-handler');
 const Post = require('../models/Post');
 
 // 레시피 등록 API
@@ -35,31 +36,34 @@ router.post('/', verifyToken, (req, res) => {
 });
 
 //레시피 전체 목록 조회 API
-router.get('/', async (req, res) => {
-  const countPerPage = parseInt(req.query.countperpage) || 10;
-  const pageNo = parseInt(req.query.pageno) || 1;
+router.get(
+  '/',
+  asynchandler(async (req, res) => {
+    const countPerPage = parseInt(req.query.countperpage) || 10;
+    const pageNo = parseInt(req.query.pageno) || 1;
 
-  const posts = await Post.find({});
+    const posts = await Post.find({});
 
-  if (pageNo > 0) {
-    const totalCount = posts.length;
-    let startItemNo = (pageNo - 1) * countPerPage;
-    let endItemNo = pageNo * countPerPage - 1;
+    if (pageNo > 0) {
+      const totalCount = posts.length;
+      let startItemNo = (pageNo - 1) * countPerPage;
+      let endItemNo = pageNo * countPerPage - 1;
 
-    if (endItemNo > totalCount - 1) {
-      endItemNo = totalCount - 1;
-    }
-    let postsPageList = [];
-    if (startItemNo < totalCount) {
-      for (let i = startItemNo; i <= endItemNo; i++) {
-        postsPageList.push(posts[i]);
+      if (endItemNo > totalCount - 1) {
+        endItemNo = totalCount - 1;
       }
-      res.json(postsPageList);
-    } else {
-      res.json(posts);
+      let postsPageList = [];
+      if (startItemNo < totalCount) {
+        for (let i = startItemNo; i <= endItemNo; i++) {
+          postsPageList.push(posts[i]);
+        }
+        res.json(postsPageList);
+      } else {
+        res.json(posts);
+      }
     }
-  }
-});
+  }),
+);
 
 //레시피 검색 조회 API
 router.get('/search', async (req, res) => {
@@ -67,6 +71,37 @@ router.get('/search', async (req, res) => {
   const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } });
   res.json(posts);
 });
+
+//레시피 카테고리별 조회 API
+router.get(
+  '/category',
+  asynchandler(async (req, res) => {
+    const { category } = req.query;
+    const countPerPage = parseInt(req.query.countperpage) || 10;
+    const pageNo = parseInt(req.query.pageno) || 1;
+
+    const posts = await Post.find({ category: category });
+
+    if (pageNo > 0) {
+      const totalCount = posts.length;
+      let startItemNo = (pageNo - 1) * countPerPage;
+      let endItemNo = pageNo * countPerPage - 1;
+
+      if (endItemNo > totalCount - 1) {
+        endItemNo = totalCount - 1;
+      }
+      let postsPageList = [];
+      if (startItemNo < totalCount) {
+        for (let i = startItemNo; i <= endItemNo; i++) {
+          postsPageList.push(posts[i]);
+        }
+        res.json(postsPageList);
+      } else {
+        res.json(posts);
+      }
+    }
+  }),
+);
 
 //레시피 상세 조회 API
 router.get('/:postId', async (req, res) => {
