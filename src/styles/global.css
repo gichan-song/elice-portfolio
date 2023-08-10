@@ -12,7 +12,7 @@
   --main-color: #ffcd3c;
   --sub-darker-color: #e7b10a;
   --sub-basic-color: #ffe8a5;
-  --sub-lighter-color: #fff2cf;
+  --sub-lighter-color: #fdebb8;
 
   --main-bg-color: #ffffff;
   --sub-bg-color: #f5f5f5;
@@ -21,6 +21,8 @@
   --text-color: #767676;
   --text-light-color: #c4c4c4;
   --text-white-color: #ffffff;
+  --text-alert-color: #e95b5b;
+  --text-valied-color: #019443;
 
   --border-color: #c4c4c4;
 }
