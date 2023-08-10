@@ -105,7 +105,10 @@ router.put('/profile', verifyToken, (req, res) => {
     }
     user.nickname = nickname;
     user.profileImg = profileImg;
-    user.password = changedpassword;
+
+    if (changedpassword !== '' && changedpassword !== undefined) {
+      user.password = changedpassword;
+    }
 
     user.save();
 
