@@ -42,7 +42,7 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({});
+    const posts = await Post.find({}).populate('user').sort({ createdAt: -1 });
 
     if (pageNo > 0) {
       const totalCount = posts.length;
@@ -215,8 +215,17 @@ router.post('/:postId/comments', verifyToken, (req, res) => {
       res.status(404).json({ message: 'User not found' });
       return;
     }
+    // 1. 현재 시간(Locale)
+    const curr = new Date();
 
-    post.comments.push({ comment: comment, date: Date.now(), user: user });
+    // 2. UTC 시간 계산
+    const utc = curr.getTime() + curr.getTimezoneOffset() * 60 * 1000;
+
+    // 3. UTC to KST (UTC + 9시간)
+    const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+    const kr_curr = new Date(utc + KR_TIME_DIFF);
+
+    post.comments.push({ comment: comment, date: curr, user: user });
 
     post.save();
 
