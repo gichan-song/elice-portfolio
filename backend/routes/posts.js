@@ -80,7 +80,7 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({ category: category });
+    const posts = await Post.find({ category: category }).populate('user').sort({ createdAt: -1 });
 
     if (pageNo > 0) {
       const totalCount = posts.length;
