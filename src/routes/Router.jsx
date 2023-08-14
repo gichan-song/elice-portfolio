@@ -8,7 +8,7 @@ import HomePage from '../pages/HomePage/HomePage';
 import JoinPage from '../pages/JoinPage/JoinPage';
 import LoginPage from '../pages/LoginPage/LoginPage';
 import NotFoundpage from '../pages/NotFoundPage/NotFoundPage';
-import TestPage from '../pages/TestPage/TestPage';
+// import TestPage from '../pages/TestPage/TestPage';
 import PostUploadPage from '../pages/postPage/PostUploadPage/PostUploadPage';
 import PostDetailPage from '../pages/postPage/postDetailPage/PostDetailPage';
 import PostEditPage from '../pages/postPage/PostEditPage/PostEditPage';
