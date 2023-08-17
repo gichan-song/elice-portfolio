@@ -17,6 +17,7 @@ const UserSchema = new Schema(
       type: String,
     },
     scraps: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
+    likes: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   },
   { collection: 'users' },
   {

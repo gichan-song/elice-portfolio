@@ -87,9 +87,9 @@ router.get(
   }),
 );
 
-//로그인한 유저의 레시피 목록 조회 API
+//로그인한 유저의 전체 레시피 목록 조회 API
 router.get(
-  '/:userId',
+  '/user/:userId',
   asynchandler(async (req, res) => {
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
@@ -139,11 +139,17 @@ router.get(
 );
 
 //레시피 검색 조회 API
-router.get('/search', async (req, res) => {
-  const { searchquery } = req.query;
-  const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } });
-  res.json(posts);
-});
+router.get(
+  '/search',
+  asynchandler(async (req, res) => {
+    const { searchquery } = req.query;
+    if (searchquery[0] === '?' || searchquery[0] === '=') {
+      res.status(405).json({ message: 'cannot insert query including ? or = at first' });
+    }
+    const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } });
+    res.json(posts);
+  }),
+);
 
 //레시피 카테고리별 조회 API
 router.get(
@@ -179,7 +185,7 @@ router.get(
 //레시피 상세 조회 API
 router.get('/:postId', async (req, res) => {
   const { postId } = req.params;
-  const post = await Post.findOne({ _id: postId }).populate('user');
+  const post = await Post.findById(postId).populate('user');
   const comments = post.comments;
   const curr = Date.now() / 1000;
   for (let i = 0; i < comments.length; i++) {
@@ -202,7 +208,7 @@ router.get('/:postId', async (req, res) => {
     }
   }
   post.comments = comments;
-
+  console.log(post);
   res.json(post);
 });
 
@@ -280,8 +286,10 @@ router.post('/:postId/like', verifyToken, (req, res) => {
     const like = post.likes.find((like) => like.user.toString() === authData._id.toString());
     if (like) {
       post.likes.pull(like._id);
+      user.likes.pull(postId);
     } else {
       post.likes.push({ user: authData._id });
+      user.likes.push(postId);
     }
 
     post.save();
@@ -358,7 +366,7 @@ router.delete('/:postId/comments/:commentId', verifyToken, (req, res) => {
       return;
     }
 
-    if (comment.user.toString() !== authData._id.toString()) {
+    if (comment.user_id.toString() !== authData._id.toString()) {
       res.status(401).json({ message: 'User not authorized' });
       return;
     }
