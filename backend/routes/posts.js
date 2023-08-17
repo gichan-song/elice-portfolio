@@ -29,6 +29,7 @@ router.post('/', verifyToken, (req, res) => {
       category: recipeIntro.category,
       orders: orderInfos,
       user: user,
+      date: Date.now(),
     }).then((result) => {
       res.json({ message: 'Post created' });
     });
@@ -42,7 +43,7 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({}).populate('user').sort({ createdAt: -1 });
+    const posts = await Post.find({}).populate('user').sort({ date: -1 });
 
     if (pageNo > 0) {
       const totalCount = posts.length;
@@ -233,7 +234,6 @@ router.post('/:postId/comments', verifyToken, (req, res) => {
       return;
     }
     const user = await User.findById(authData._id);
-    console.log(user);
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });

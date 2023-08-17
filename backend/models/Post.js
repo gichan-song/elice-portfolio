@@ -42,6 +42,9 @@ const postSchema = new Schema(
     ],
 
     orders: [new mongoose.Schema({ id: String, content: String, orderImage: String })],
+    date: {
+      type: String,
+    },
   },
 
   {
