@@ -16,14 +16,7 @@ const UserSchema = new Schema(
     password: {
       type: String,
     },
-    scraps: [
-      new Schema({
-        post: {
-          type: Schema.Types.ObjectId,
-          ref: 'Post',
-        },
-      }),
-    ],
+    scraps: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   },
   { collection: 'users' },
   {

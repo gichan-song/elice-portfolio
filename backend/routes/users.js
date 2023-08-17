@@ -71,7 +71,7 @@ router.get('/profile', verifyToken, (req, res) => {
       res.status(403).json({ message: 'Login required' });
       return;
     }
-    const user = await User.findById(authData._id);
+    const user = await User.findById(authData._id).populate('scraps');
 
     if (!user) {
       res.status(401).json({ message: 'User not found' });
@@ -166,12 +166,19 @@ router.post('/:postId', verifyToken, (req, res) => {
       return;
     }
 
-    const scrap = user.scraps.find((scrap) => scrap.post.toString() === postId.toString());
+    const scraps = user.scraps;
+    let flag = false;
 
-    if (scrap) {
-      user.scraps.pull(scrap._id);
-    } else {
-      user.scraps.push({ post: post._id });
+    for (let i = 0; i < scraps.length; i++) {
+      if (scraps[i].toString() === postId) {
+        user.scraps.pull(postId);
+        flag = true;
+        break;
+      }
+    }
+
+    if (!flag) {
+      user.scraps.push(postId);
     }
 
     user.save();
