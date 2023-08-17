@@ -44,6 +44,27 @@ router.get(
     const pageNo = parseInt(req.query.pageno) || 1;
 
     const posts = await Post.find({}).populate('user').sort({ date: -1 });
+    const curr = Date.now() / 1000;
+
+    for (let i = 0; i < posts.length; i++) {
+      const diff = curr - posts[i].date / 1000;
+
+      if (diff < 60) {
+        posts[i].date = `${Math.floor(diff)}초 전`;
+      } else if (diff < 3600) {
+        posts[i].date = `${Math.floor(diff / 60)}분 전`;
+      } else if (diff < 86400) {
+        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
+      } else if (diff < 604800) {
+        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
+      } else if (diff < 2592000) {
+        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
+      } else if (diff < 31536000) {
+        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
+      } else {
+        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
+      }
+    }
 
     if (pageNo > 0) {
       const totalCount = posts.length;
