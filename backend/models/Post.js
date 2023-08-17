@@ -22,10 +22,12 @@ const postSchema = new Schema(
     },
     comments: [
       new mongoose.Schema({
-        user: {
+        user_id: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
         },
+        userNickname: String,
+        userProfileImg: String,
         comment: String,
         date: String,
       }),

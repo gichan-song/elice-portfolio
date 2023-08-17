@@ -106,7 +106,30 @@ router.get(
 //레시피 상세 조회 API
 router.get('/:postId', async (req, res) => {
   const { postId } = req.params;
-  const post = await Post.findOne({ _id: postId });
+  const post = await Post.findOne({ _id: postId }).populate('user');
+  const comments = post.comments;
+  const curr = Date.now() / 1000;
+  for (let i = 0; i < comments.length; i++) {
+    const diff = curr - comments[i].date;
+
+    if (diff < 60) {
+      comments[i].date = `${Math.floor(diff)}초 전`;
+    } else if (diff < 3600) {
+      comments[i].date = `${Math.floor(diff / 60)}분 전`;
+    } else if (diff < 86400) {
+      comments[i].date = `${Math.floor(diff / 3600)}시간 전`;
+    } else if (diff < 604800) {
+      comments[i].date = `${Math.floor(diff / 86400)}일 전`;
+    } else if (diff < 2592000) {
+      comments[i].date = `${Math.floor(diff / 604800)}주 전`;
+    } else if (diff < 31536000) {
+      comments[i].date = `${Math.floor(diff / 2592000)}달 전`;
+    } else {
+      comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
+    }
+  }
+  post.comments = comments;
+
   res.json(post);
 });
 
@@ -210,22 +233,22 @@ router.post('/:postId/comments', verifyToken, (req, res) => {
       return;
     }
     const user = await User.findById(authData._id);
+    console.log(user);
 
     if (!user) {
       res.status(404).json({ message: 'User not found' });
       return;
     }
-    // 1. 현재 시간(Locale)
-    const curr = new Date();
 
-    // 2. UTC 시간 계산
-    const utc = curr.getTime() + curr.getTimezoneOffset() * 60 * 1000;
+    const curr = Date.now() / 1000;
 
-    // 3. UTC to KST (UTC + 9시간)
-    const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
-    const kr_curr = new Date(utc + KR_TIME_DIFF);
-
-    post.comments.push({ comment: comment, date: curr, user: user });
+    post.comments.push({
+      comment: comment,
+      date: curr,
+      user_id: authData._id,
+      userNickname: user.nickname,
+      userProfileImg: user.profileImg,
+    });
 
     post.save();
 
