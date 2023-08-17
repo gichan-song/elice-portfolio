@@ -307,9 +307,11 @@ router.delete('/:postId/comments/:commentId', verifyToken, (req, res) => {
       return;
     }
 
-    if (comment.user.toString() !== authData._id.toString()) {
-      res.status(401).json({ message: 'User not authorized' });
-      return;
+    if (comment.user_id !== undefined) {
+      if (comment.user_id.toString() !== authData._id.toString()) {
+        res.status(401).json({ message: 'User not authorized' });
+        return;
+      }
     }
 
     post.comments.pull(comment._id);
