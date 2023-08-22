@@ -4,7 +4,8 @@ import MainHeadingLayout from './../../components/common/layout/MainHeadingLayou
 const GuidePage = () => {
   return (
     <>
-      <MainHeadingLayout MainheadingName='키친 가이드' />
+      <MainHeadingLayout mainheadingName='키친 가이드' />
+      준비 중입니다.
     </>
   );
 };

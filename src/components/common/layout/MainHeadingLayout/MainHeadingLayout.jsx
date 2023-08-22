@@ -1,8 +1,8 @@
 import React from 'react';
 import { styled } from 'styled-components';
 
-const MainHeadingLayout = ({ MainheadingName }) => {
-  return <H2>{MainheadingName}</H2>;
+const MainHeadingLayout = ({ mainheadingName }) => {
+  return <H2>{mainheadingName}</H2>;
 };
 
 export default MainHeadingLayout;

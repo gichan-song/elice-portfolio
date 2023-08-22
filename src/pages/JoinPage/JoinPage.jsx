@@ -110,7 +110,7 @@ const JoinPage = () => {
 
   return (
     <>
-      <MainHeadingLayout MainheadingName='회원가입' />
+      <MainHeadingLayout mainheadingName='회원가입' />
       <Container>
         <ImageLabel htmlFor='profileImage'>
           <ProfileImage src={profileImage} alt='미리보기 이미지' />
