@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { css, styled } from 'styled-components';
 import imageCompression from 'browser-image-compression';
 import MainHeadingLayout from './../../../components/common/layout/MainHeadingLayout/MainHeadingLayout';
@@ -8,11 +8,58 @@ import plusIcon from '../../../assets/icons/plus-icon.svg';
 import plusSqureIcon from '../../../assets/icons/plus-square-icon.svg';
 import deleteIcon from '../../../assets/icons/delete-icon.svg';
 import Button from './../../../components/common/Button/Button';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import API from '../../../api/API';
+import ENDPOINT from '../../../api/ENDPOINT';
+import { mediaMaxWidth } from '../../../styles/GlobalStyle';
 
 const PostEditPage = () => {
   const navigate = useNavigate();
+
+  const params = useParams();
+
+  const [detailInfo, setDetailInfo] = useState('');
+  console.log(detailInfo);
+
+  // 초기 상태 가져오기
+  const getDetailInfo = useCallback(() => {
+    params.postid &&
+      API(`${ENDPOINT.POSTS}/${params.postid}`, 'GET')
+        .then((res) => {
+          console.log(res);
+          setDetailInfo(res.data);
+
+          // 초기 상태
+          setRecipeIntro((prevRecipeIntro) => ({
+            ...prevRecipeIntro,
+            category: res.data.category || '',
+            title: res.data.title || '',
+            content: res.data.recipe,
+            image: res.data.thumbnail,
+          }));
+
+          console.log(res.data.orders[0].content);
+
+          // 조리 순서 초기 상태
+          const ordersInfo = res.data.orders;
+
+          ordersInfo.map((item) =>
+            setOrderInfos((prevOrderInfo) => [
+              ...prevOrderInfo,
+              {
+                id: item.id,
+                content: item.content,
+                orderImage: item.orderImage,
+              },
+            ]),
+          );
+        })
+        .catch((err) => console.log(err));
+  }, [params]);
+
+  useEffect(() => {
+    getDetailInfo();
+  }, [getDetailInfo]);
 
   // 요리 소개 정보
   const [recipeIntro, setRecipeIntro] = useState({
@@ -24,13 +71,7 @@ const PostEditPage = () => {
   console.log(recipeIntro);
 
   // 조리 순서 정보
-  const [orderInfos, setOrderInfos] = useState([
-    {
-      id: Date.now(),
-      content: '',
-      orderImage: '',
-    },
-  ]);
+  const [orderInfos, setOrderInfos] = useState([]);
   console.log(orderInfos);
 
   // 카테고리 상태 관리
@@ -140,22 +181,20 @@ const PostEditPage = () => {
   // 레시피 수정하기
   const handleEdit = () => {
     console.log('레시피 수정하기 버튼 로직이 들어갈 곳입니다.');
-    const option = {
-      url: 'http://localhost:3000/posts',
-      method: 'PUT',
-      data: {
-        recipeIntro: recipeIntro,
-        orderInfos: orderInfos,
-      },
-    };
-
-    axios(option)
+    API(`${ENDPOINT.POSTS}/${params.postid}`, 'PUT', {
+      recipeIntro: recipeIntro,
+      orderInfos: orderInfos,
+    })
       .then((res) => {
         // 레시피 수정 성공 시
         console.log(res);
         navigate('/');
       })
       .catch((err) => {
+        if (err.response.data.message === 'User not authorized') {
+          alert('자신의 게시물만 수정할 수 있습니다.');
+          navigate(`/post/${params.postid}`);
+        }
         console.log(err);
       });
   };
@@ -168,17 +207,23 @@ const PostEditPage = () => {
 
   const handleRemove = () => {
     console.log('게시물 삭제하기 로직이 들어갈 곳입니다.');
+    API(`${ENDPOINT.POSTS}/${params.postid}`, 'DELETE')
+      .then((res) => {
+        console.log(res);
+        navigate('/');
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
     <>
-      <MainHeadingLayout MainheadingName='레시피 수정' />
+      <MainHeadingLayout mainheadingName='레시피 수정' />
       <SubHeadingLayout subHeadingName='카테고리 선택 및 요리 소개'>
         <RemoveBtn type='button' onClick={handleRemove}>
           게시글 삭제하기
         </RemoveBtn>
         <RecipeContainer>
-          <DropDownMenu getCategory={getCategory} />
+          <DropDownMenu getCategory={getCategory} inititalCategory={recipeIntro.category} />
           <RecipeInputContainer>
             <TitleInput
               type='text'
@@ -211,23 +256,25 @@ const PostEditPage = () => {
           {orderInfos.map((orderInfo, index) => (
             <OrderInfo key={orderInfo.id}>
               <StepSpan>{`Step ${index + 1}`}</StepSpan>
-              <OrderContent
-                placeholder='조리과정에 대해 설명해 주세요.'
-                maxLength='600'
-                value={orderInfos.content}
-                onChange={(e) => {
-                  handleOrderContent(e, index);
-                }}
-              />
-              <OrderImgLabel htmlFor={`contentImage-${orderInfo.id}`} $imagePreview={orderInfo.orderImage}>
-                {orderInfo.orderImage === '' ? '' : <ImagePreview src={orderInfo.orderImage} alt='미리보기 이미지' />}
-              </OrderImgLabel>
-              <OrderImgInput
-                id={`contentImage-${orderInfo.id}`}
-                type='file'
-                accept='image/*'
-                onChange={(e) => handleImageChange(e, index)}
-              />
+              <OrderContainer>
+                <OrderContent
+                  placeholder='조리과정에 대해 설명해 주세요.'
+                  maxLength='600'
+                  value={orderInfo.content}
+                  onChange={(e) => {
+                    handleOrderContent(e, index);
+                  }}
+                />
+                <OrderImgLabel htmlFor={`contentImage-${orderInfo.id}`} $imagePreview={orderInfo.orderImage}>
+                  {orderInfo.orderImage === '' ? '' : <ImagePreview src={orderInfo.orderImage} alt='미리보기 이미지' />}
+                </OrderImgLabel>
+                <OrderImgInput
+                  id={`contentImage-${orderInfo.id}`}
+                  type='file'
+                  accept='image/*'
+                  onChange={(e) => handleImageChange(e, index)}
+                />
+              </OrderContainer>
               <DeleteImg
                 src={deleteIcon}
                 alt='삭제 아이콘'
@@ -271,6 +318,11 @@ const RecipeContainer = styled.div`
   display: flex;
   gap: 3rem;
   width: 100%;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 `;
 
 const RecipeInputContainer = styled.div`
@@ -355,6 +407,10 @@ const ImgDiv = styled.div`
   font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--text-light-color);
+
+  @media (max-width: ${mediaMaxWidth}) {
+    font-size: inherit;
+  }
 `;
 
 // [시작] 조리순서
@@ -371,20 +427,31 @@ const OrderInfo = styled.div`
   position: relative;
   gap: 1.5rem;
   width: 100%;
-  height: 14rem;
+  height: 100%;
   padding: 1.5rem;
   background: var(--sub-lighter-color);
   border-radius: 1rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    flex-direction: column;
+  }
 `;
 
 const StepSpan = styled.span`
+  white-space: nowrap;
   font-size: var(--fs-xs);
   font-weight: 700;
 `;
 
-const OrderContent = styled.textarea`
-  width: 39rem;
+const OrderContainer = styled.div`
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
   height: 100%;
+`;
+
+const OrderContent = styled.textarea`
+  width: 100%;
   resize: none;
   border: 1px solid var(--border-light-color);
   border-radius: 1rem;
@@ -396,17 +463,27 @@ const OrderContent = styled.textarea`
     outline: none;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  @media (max-width: ${mediaMaxWidth}) {
+    width: 50%;
+  }
 `;
 
 const OrderImgLabel = styled.label`
   display: block;
-  width: 100%;
-  max-width: 15rem;
+  min-width: 15rem;
   height: 11rem;
+  margin-right: 2rem;
   border-radius: 1rem;
   cursor: pointer;
   background: ${(props) => (props.$imagePreview ? '' : `url(${plusIcon})`)} var(--sub-basic-color) no-repeat center;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: ${mediaMaxWidth}) {
+    min-width: initial;
+    width: 50%;
+    margin: initial;
+  }
 `;
 
 const OrderImgInput = styled.input`
@@ -453,5 +530,11 @@ const ButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
   gap: 3rem;
-  margin-top: 2rem;
+  width: 60%;
+  height: 5rem;
+  margin: 2rem auto 0;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    height: 4.5rem;
+  }
 `;
