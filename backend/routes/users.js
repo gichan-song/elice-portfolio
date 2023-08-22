@@ -6,7 +6,7 @@ const express = require('express'),
 const User = require('../models/user');
 const Post = require('../models/Post');
 const verifyToken = require('../middlewares/verifyToken');
-const hashPassword = require('../utils/hash-password');
+const hashPassword = require('../utils/hash-password').default;
 const asynchandler = require('express-async-handler');
 
 // 회원가입 API
@@ -73,6 +73,53 @@ router.post(
   }),
 );
 
+// 스크랩 조회 API
+router.get('/profile/scraps', verifyToken, (req, res) => {
+  jwt.verify(
+    req.token,
+    'secret',
+    asynchandler(async (err, authData) => {
+      if (err) {
+        res.status(403).json({ message: 'Login required' });
+        return;
+      }
+      const scraps = await User.findById(authData._id)
+        .populate('scraps')
+        .populate({ path: 'scraps', populate: { path: 'user' } })
+        .select('scraps');
+
+      if (!scraps) {
+        res.status(401).json({ message: 'User not found' });
+        return;
+      }
+
+      const copyScraps = [...scraps._doc.scraps];
+
+      const copyScrapsUser = copyScraps.map((scrap) => {
+        return scrap.user;
+      });
+      for (let i = 0; i < copyScrapsUser.length; i++) {
+        delete copyScrapsUser[i]._doc.scraps;
+        delete copyScrapsUser[i]._doc.likes;
+        delete copyScrapsUser[i]._doc.password;
+      }
+      for (let i = 0; i < copyScraps.length; i++) {
+        delete copyScraps[i]._doc.orders;
+        delete copyScraps[i]._doc.comments;
+        delete copyScraps[i]._doc.likes;
+        copyScraps[i]._doc.user = copyScrapsUser[i];
+      }
+
+      res.json(copyScraps);
+    }),
+  );
+});
+function withoutProperty(obj, property) {
+  const { [property]: unused, ...rest } = obj;
+
+  return rest;
+}
+
 // 프로필 조회 API
 router.get('/profile', verifyToken, (req, res) => {
   jwt.verify(
@@ -83,21 +130,14 @@ router.get('/profile', verifyToken, (req, res) => {
         res.status(403).json({ message: 'Login required' });
         return;
       }
-      const user = await User.findById(authData._id)
-        .populate('scraps')
-        .populate({ path: 'scraps', populate: { path: 'user' } });
+      const user = await User.findById(authData._id).select('-scraps -password -likes');
 
       if (!user) {
         res.status(401).json({ message: 'User not found' });
         return;
       }
 
-      res.json({
-        id: user.id,
-        nickname: user.nickname,
-        profileImg: user.profileImg,
-        scraps: user.scraps,
-      });
+      res.json(user);
     }),
   );
 });

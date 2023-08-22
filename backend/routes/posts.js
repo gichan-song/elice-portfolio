@@ -170,8 +170,9 @@ router.get('/:postId', async (req, res) => {
       comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
     }
   }
+
   post.comments = comments;
-  console.log(post);
+
   res.json(post);
 });
 
