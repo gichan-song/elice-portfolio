@@ -99,13 +99,12 @@ router.get('/user', verifyToken, (req, res) => {
     const likes = await User.findById(authData._id).select('likes');
 
     for (let i = 0; i < posts.length; i++) {
-      if (posts[i]._id in likes) {
-        posts[i].isLiked = true;
+      if (likes.likes.includes(posts[i]._id)) {
+        posts[i]._doc.isLiked = true;
       } else {
-        posts[i].isLiked = false;
+        posts[i]._doc.isLiked = false;
       }
     }
-    console.log(posts);
 
     res.json(posts);
   });

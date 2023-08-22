@@ -115,6 +115,7 @@ router.get('/profile/scraps', verifyToken, (req, res) => {
         delete copyScraps[i]._doc.orders;
         delete copyScraps[i]._doc.comments;
         delete copyScraps[i]._doc.likes;
+
         copyScraps[i]._doc.user = copyScrapsUser[i];
         copyScraps[i]._doc.likesCount = likesCount[i];
         copyScraps[i]._doc.commentsCount = commentsCount[i];
