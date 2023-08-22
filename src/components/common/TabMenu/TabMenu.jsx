@@ -45,7 +45,7 @@ const TabMenu = () => {
       ? {
           name: '프로필',
           // path: `/profile/${nickname}`,
-          path: '/profile',
+          path: '/profile/edit',
           nonActive: userIcon,
           active: userFillIcon,
         }

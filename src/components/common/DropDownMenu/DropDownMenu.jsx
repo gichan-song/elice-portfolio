@@ -6,7 +6,7 @@ import useModal from '../../../hooks/useModal';
 
 const categories = ['한식', '양식', '일식', '중식', '분식', '도시락', '디저트', '기타'];
 
-const DropDownMenu = ({ getCategory }) => {
+const DropDownMenu = ({ getCategory, inititalCategory }) => {
   const [dropDownMenuName, setDropDownMenuName] = useState('카테고리');
   const [selectedCategory, setSelectedCategory] = useState();
   const [modalOpen, toggle, targetRef, contentRef] = useModal();
@@ -14,7 +14,8 @@ const DropDownMenu = ({ getCategory }) => {
   useEffect(() => {
     // PostUpladPage로 상태 끌어올리기
     getCategory(selectedCategory);
-  }, [selectedCategory, getCategory]);
+    inititalCategory && setDropDownMenuName(inititalCategory);
+  }, [selectedCategory, getCategory, inititalCategory]);
 
   return (
     <>

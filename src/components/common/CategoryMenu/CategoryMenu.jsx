@@ -10,16 +10,15 @@ const CategoryMenu = ({ getSelectedCategory }) => {
     <Nav>
       <Ul>
         {categories.map((category) => (
-          <Li
+          <button
             key={category}
-            $selectedMenu={selectedMenu === category}
             onClick={() => {
               setSelectedMenu(category);
               getSelectedCategory(category);
             }}
           >
-            {category}
-          </Li>
+            <Li $selectedMenu={selectedMenu === category}>{category}</Li>
+          </button>
         ))}
       </Ul>
     </Nav>
@@ -37,6 +36,7 @@ const Nav = styled.nav`
 const Ul = styled.nav`
   display: flex;
   gap: 2rem;
+  flex-wrap: wrap;
 `;
 
 const Li = styled.li`

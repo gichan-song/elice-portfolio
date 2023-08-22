@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import Button from '../Button/Button';
+import { AuthContextStore } from '../../../context/AuthContext';
+import { mediaMaxWidth } from '../../../styles/GlobalStyle';
 
 const menuList = [
   {
@@ -29,6 +32,7 @@ const menuList = [
 ];
 
 const SideMenu = ({ contentRef, toggle }) => {
+  const { token, setToken } = useContext(AuthContextStore);
   const navigate = useNavigate();
 
   // 사이드바 열렸을 때, 스크롤 막기
@@ -53,10 +57,18 @@ const SideMenu = ({ contentRef, toggle }) => {
   const onClickMoveScrapListPageHandler = (name) => {
     toggle();
     if (name === '내 스크랩') {
-      navigate('/profile');
+      navigate('/profile/myscrap');
     } else if (name === '뭐 먹을까?') {
       navigate('/game');
     }
+  };
+
+  // 로그아웃
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    navigate('/');
+    window.location.reload();
   };
 
   return (
@@ -93,6 +105,13 @@ const SideMenu = ({ contentRef, toggle }) => {
             ))}
           </MainUl>
         </nav>
+        {token ? (
+          <Button type='logout' onClickHandler={handleLogout}>
+            로그아웃
+          </Button>
+        ) : (
+          <></>
+        )}
       </Aside>
       <SideMenuOverlay></SideMenuOverlay>
     </>
@@ -102,6 +121,9 @@ const SideMenu = ({ contentRef, toggle }) => {
 export default SideMenu;
 
 const Aside = styled.aside`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: absolute;
   top: 0;
   left: 0;
@@ -110,17 +132,30 @@ const Aside = styled.aside`
   padding: 10rem 3rem;
   background: #ffffff;
   z-index: 100;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    width: 40%;
+    padding: 10rem 1.5rem;
+  }
 `;
 
 const MainUl = styled.ul`
   display: flex;
   flex-direction: column;
   gap: 3rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    gap: 1rem;
+  }
 `;
 
 const MainMenuLi = styled.li`
   font-size: var(--fs-xl);
   font-weight: 700;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    font-size: var(--fs-md);
+  }
 `;
 
 const MainMenuSpan = styled.span`
@@ -141,6 +176,11 @@ const SubUl = styled.ul`
   flex-direction: column;
   gap: 2rem;
   margin-top: 2rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    gap: 1rem;
+    margin-top: 1rem;
+  }
 `;
 
 const SubLi = styled.li`
@@ -148,6 +188,10 @@ const SubLi = styled.li`
   color: var(--text-color);
   text-indent: 2rem;
   cursor: pointer;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    font-size: var(--fs-xs);
+  }
 `;
 
 const SideMenuOverlay = styled.div`
