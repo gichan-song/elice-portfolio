@@ -95,9 +95,19 @@ router.get('/user', verifyToken, (req, res) => {
       return;
     }
 
-    const likes = await User.findById(authData._id).populate('likes');
+    const posts = await Post.find({}).populate('user').sort({ date: -1 });
+    const likes = await User.findById(authData._id).select('likes');
 
-    res.json(likes.likes);
+    for (let i = 0; i < posts.length; i++) {
+      if (posts[i]._id in likes) {
+        posts[i].isLiked = true;
+      } else {
+        posts[i].isLiked = false;
+      }
+    }
+    console.log(posts);
+
+    res.json(posts);
   });
 });
 

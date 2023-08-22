@@ -98,6 +98,14 @@ router.get('/profile/scraps', verifyToken, (req, res) => {
       const copyScrapsUser = copyScraps.map((scrap) => {
         return scrap.user;
       });
+
+      const likesCount = scraps._doc.scraps.map((scrap) => {
+        return scrap.likes.length;
+      });
+
+      const commentsCount = scraps._doc.scraps.map((scrap) => {
+        return scrap.comments.length;
+      });
       for (let i = 0; i < copyScrapsUser.length; i++) {
         delete copyScrapsUser[i]._doc.scraps;
         delete copyScrapsUser[i]._doc.likes;
@@ -108,17 +116,14 @@ router.get('/profile/scraps', verifyToken, (req, res) => {
         delete copyScraps[i]._doc.comments;
         delete copyScraps[i]._doc.likes;
         copyScraps[i]._doc.user = copyScrapsUser[i];
+        copyScraps[i]._doc.likesCount = likesCount[i];
+        copyScraps[i]._doc.commentsCount = commentsCount[i];
       }
 
       res.json(copyScraps);
     }),
   );
 });
-function withoutProperty(obj, property) {
-  const { [property]: unused, ...rest } = obj;
-
-  return rest;
-}
 
 // 프로필 조회 API
 router.get('/profile', verifyToken, (req, res) => {
