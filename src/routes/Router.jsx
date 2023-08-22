@@ -14,6 +14,8 @@ import PostDetailPage from '../pages/postPage/postDetailPage/PostDetailPage';
 import PostEditPage from '../pages/postPage/PostEditPage/PostEditPage';
 import ProfileSettingPage from '../pages/profileSettingPage/ProfileSettingPage';
 import GuidePage from '../pages/guidePage/GuidePage';
+import SearchPage from '../pages/SearchPage/SearchPage';
+import MyScrapList from '../pages/profileSettingPage/MyScrapList/MyScrapList';
 
 const Router = () => {
   const { token } = useContext(AuthContextStore);
@@ -34,9 +36,10 @@ const Router = () => {
         <Route path='/post' element={<PostUploadPage />} />
         <Route path='/post/:postid' element={<PostDetailPage />} />
         <Route path='/post/edit/:postid' element={<PostEditPage />} />
-        {/* <Route path='/profile/:nickname' element={<ProfileSettingPage />} /> */}
-        <Route path='/profile' element={<ProfileSettingPage />} />
+        <Route path='/profile/edit' element={<ProfileSettingPage />} />
+        <Route path='/profile/myscrap' element={<MyScrapList />} />
         <Route path='/guide' element={<GuidePage />} />
+        <Route path='/search' element={<SearchPage />} />
       </Route>
     </Routes>
   );
