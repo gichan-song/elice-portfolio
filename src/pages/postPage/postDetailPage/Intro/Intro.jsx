@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css, styled } from 'styled-components';
 import SubHeadingLayout from '../../../../components/common/layout/SubHeadingLayout/SubHeadingLayout';
 import profileIcon from '../../../../assets/icons/profile-icon.svg';
@@ -7,13 +7,38 @@ import bookmarkFillIcon from '../../../../assets/icons/bookmark-fill-icon.svg';
 import heartIcon from '../../../../assets/icons/heart-icon.svg';
 import heartFillIcon from '../../../../assets/icons/heart-fill-icon.svg';
 import commentIcon from '../../../../assets/icons/comment-icon.svg';
+import { useNavigate } from 'react-router-dom';
+import { mediaMaxWidth } from '../../../../styles/GlobalStyle';
+import API from '../../../../api/API';
+import ENDPOINT from '../../../../api/ENDPOINT';
 
-const Intro = () => {
+const Intro = ({ postInfo }) => {
+  console.log(postInfo);
+
+  const navigate = useNavigate();
+
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isMyPost, setIsMyPost] = useState(false);
+
+  // 자신의 게시물인지 확인
+  useEffect(() => {
+    postInfo &&
+      API(`${ENDPOINT.GET_USER_INFO}`, 'GET')
+        .then((res) => {
+          console.table(res.data);
+          if (res.data.nickname === postInfo.user.nickname) {
+            setIsMyPost(true);
+          } else {
+            setIsMyPost(false);
+          }
+        })
+        .catch((err) => console.log(err));
+  }, [postInfo]);
 
   const handleModify = () => {
     console.log('수정하기 로직이 들어갈 곳입니다.');
+    navigate(`/post/edit/${postInfo._id}`);
   };
 
   return (
@@ -22,13 +47,16 @@ const Intro = () => {
         <RecipeContainer>
           <UserInfoContainer>
             <UserProfile>
-              <UserProfileImg src={profileIcon} alt='유저 프로필' />
+              <UserProfileImg
+                src={postInfo.user?.profileImg ? postInfo.user?.profileImg : profileIcon}
+                alt='유저 프로필'
+              />
               <UserName>
-                <UserNameStrong>{'test'}</UserNameStrong>님의 Recipe
+                <UserNameStrong>{postInfo.user?.nickname}</UserNameStrong>님의 Recipe
               </UserName>
             </UserProfile>
             <UserAction>
-              <ModifyBtn onClick={handleModify}>수정하기</ModifyBtn>
+              {isMyPost && <ModifyBtn onClick={handleModify}>수정하기</ModifyBtn>}
               <BookmarkBtn
                 onClick={() => {
                   setIsBookmarked((cur) => !cur);
@@ -40,12 +68,12 @@ const Intro = () => {
           </UserInfoContainer>
           <RecipeInfoContainer>
             <TitleP>
-              <CategoryStrong>{'양식'}</CategoryStrong>
-              {'lorem'}
+              <CategoryStrong>{postInfo.category}</CategoryStrong>
+              {postInfo.title}
             </TitleP>
-            <ContentP>{`Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`}</ContentP>
+            <ContentP>{postInfo.recipe}</ContentP>
             <RecipeResultContainer>
-              <ResultImg src='https://source.unsplash.com/random/?recipe' />
+              <ResultImg src={postInfo.thumbnail ? postInfo.thumbnail : 'https://source.unsplash.com/random/?recipe'} />
               <HeartAndCommentContainer>
                 <HeartWrapper>
                   <HeartImg
@@ -55,11 +83,11 @@ const Intro = () => {
                       setIsLiked((cur) => !cur);
                     }}
                   />
-                  <Count>0</Count>
+                  <Count>{postInfo.likes?.length}</Count>
                 </HeartWrapper>
                 <CommentWrapper>
                   <CommentImg src={commentIcon} alt='댓글 아이콘' />
-                  <Count>0</Count>
+                  <Count>{postInfo.comments?.length}</Count>
                 </CommentWrapper>
               </HeartAndCommentContainer>
             </RecipeResultContainer>
@@ -92,6 +120,7 @@ const UserProfile = styled.div`
 const UserProfileImg = styled.img`
   width: 2.4rem;
   height: 2.4rem;
+  border-radius: 50%;
   cursor: pointer;
 `;
 
@@ -114,6 +143,7 @@ const ModifyBtn = styled.button`
   font-size: var(--fs-sm);
   color: var(--text-color);
   font-weight: 700;
+  word-break: keep-all;
 `;
 
 const BookmarkBtn = styled.button`
@@ -129,6 +159,11 @@ const RecipeInfoContainer = styled.div`
   padding: 2rem;
   background: var(--sub-bg-color);
   border-radius: 1rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    padding: 1rem;
+    gap: 1rem;
+  }
 `;
 
 // 제목, 내용의 공통 속성
@@ -155,10 +190,13 @@ const TitleP = styled.p`
   align-items: center;
   gap: 1rem;
   ${ContentStyles}
+  height: 100%;
 `;
 
 // 레시피 이름
 const CategoryStrong = styled.strong`
+  text-align: center;
+  word-break: keep-all;
   border-radius: 1rem;
   padding: 0.6rem;
   background: var(--main-color);
@@ -177,6 +215,12 @@ const ContentP = styled.p`
 const RecipeResultContainer = styled.div`
   display: flex;
   gap: 2rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 `;
 
 const ResultImg = styled.img`
@@ -185,6 +229,11 @@ const ResultImg = styled.img`
   border-radius: 1rem;
   background: var(--sub-bg-darker-color);
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  /* object-fit: cover;*/
+
+  @media (max-width: ${mediaMaxWidth}) {
+    width: 100%;
+  }
 `;
 
 const HeartAndCommentContainer = styled.div`
@@ -193,6 +242,10 @@ const HeartAndCommentContainer = styled.div`
   align-items: flex-end;
   justify-content: end;
   gap: 1rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    width: 100%;
+  }
 `;
 
 // 좋아요
