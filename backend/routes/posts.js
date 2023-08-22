@@ -89,32 +89,75 @@ router.get(
 
 //로그인한 유저의 전체 레시피 목록 조회 API
 router.get('/user', verifyToken, (req, res) => {
-  jwt.verify(req.token, 'secret', async (err, authData) => {
-    if (err) {
-      res.status(403).json({ message: 'Login required' });
-      return;
-    }
-
-    const posts = await Post.find({}).populate('user').sort({ date: -1 });
-    const user = await User.findById(authData._id);
-    const likes = user.likes;
-    const scraps = user.scraps;
-
-    for (let i = 0; i < posts.length; i++) {
-      if (likes.includes(posts[i]._id)) {
-        posts[i]._doc.isLiked = true;
-      } else {
-        posts[i]._doc.isLiked = false;
+  jwt.verify(
+    req.token,
+    'secret',
+    asynchandler(async (err, authData) => {
+      if (err) {
+        res.status(403).json({ message: 'Login required' });
+        return;
       }
-      if (scraps.includes(posts[i]._id)) {
-        posts[i]._doc.isScrapped = true;
-      } else {
-        posts[i]._doc.isScrapped = false;
-      }
-    }
 
-    res.json(posts);
-  });
+      const countPerPage = parseInt(req.query.countperpage) || 10;
+      const pageNo = parseInt(req.query.pageno) || 1;
+
+      const posts = await Post.find({}).populate('user').sort({ date: -1 });
+      const user = await User.findById(authData._id);
+      const likes = user.likes;
+      const scraps = user.scraps;
+
+      const curr = Date.now() / 1000;
+
+      for (let i = 0; i < posts.length; i++) {
+        const diff = curr - posts[i].date / 1000;
+
+        if (diff < 60) {
+          posts[i].date = `${Math.floor(diff)}초 전`;
+        } else if (diff < 3600) {
+          posts[i].date = `${Math.floor(diff / 60)}분 전`;
+        } else if (diff < 86400) {
+          posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
+        } else if (diff < 604800) {
+          posts[i].date = `${Math.floor(diff / 86400)}일 전`;
+        } else if (diff < 2592000) {
+          posts[i].date = `${Math.floor(diff / 604800)}주 전`;
+        } else if (diff < 31536000) {
+          posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
+        } else {
+          posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
+        }
+        if (likes.includes(posts[i]._id)) {
+          posts[i]._doc.isLiked = true;
+        } else {
+          posts[i]._doc.isLiked = false;
+        }
+        if (scraps.includes(posts[i]._id)) {
+          posts[i]._doc.isScrapped = true;
+        } else {
+          posts[i]._doc.isScrapped = false;
+        }
+      }
+
+      if (pageNo > 0) {
+        const totalCount = posts.length;
+        let startItemNo = (pageNo - 1) * countPerPage;
+        let endItemNo = pageNo * countPerPage - 1;
+
+        if (endItemNo > totalCount - 1) {
+          endItemNo = totalCount - 1;
+        }
+        let postsPageList = [];
+        if (startItemNo < totalCount) {
+          for (let i = startItemNo; i <= endItemNo; i++) {
+            postsPageList.push(posts[i]);
+          }
+          res.json(postsPageList);
+        } else {
+          res.json(posts, totalCount);
+        }
+      }
+    }),
+  );
 });
 
 //레시피 검색 조회 API
@@ -359,5 +402,8 @@ router.delete('/:postId/comments/:commentId', verifyToken, (req, res) => {
     res.json(`comment ${commentId} deleted`);
   });
 });
+
+// 오늘 뭐 먹지? API
+router.get('/today', async (req, res) => {});
 
 module.exports = router;
