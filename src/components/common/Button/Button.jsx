@@ -2,15 +2,15 @@ import styled, { css } from 'styled-components';
 
 const TYPES = {
   register: css`
-    --button-width: 35rem;
-    --button-height: 5rem;
+    --button-width: 100%;
+    --button-height: 100%;
     --button-font-size: var(--fs-md);
     --button-color: var(--sub-darker-color);
     --button-text-color: var(--text-white-color);
   `,
   cancel: css`
-    --button-width: 10rem;
-    --button-height: 5rem;
+    --button-width: 50%;
+    --button-height: 100%;
     --button-font-size: var(--fs-md);
     --button-color: var(--main-bg-color);
     --button-text-color: var(--text-color);
@@ -34,6 +34,20 @@ const TYPES = {
     --button-width: 100%;
     --button-height: 5rem;
     --button-font-size: var(--fs-md);
+    --button-color: var(--sub-darker-color);
+    --button-text-color: var(--text-white-color);
+  `,
+  logout: css`
+    --button-width: 8rem;
+    --button-height: 4.5rem;
+    --button-font-size: var(--fs-md);
+    --button-color: var(--sub-darker-color);
+    --button-text-color: var(--text-white-color);
+  `,
+  comment: css`
+    --button-width: 8rem;
+    --button-height: 4rem;
+    --button-font-size: var(--fs-sm);
     --button-color: var(--sub-darker-color);
     --button-text-color: var(--text-white-color);
   `,
