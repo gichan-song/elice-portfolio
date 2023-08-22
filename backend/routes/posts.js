@@ -96,13 +96,20 @@ router.get('/user', verifyToken, (req, res) => {
     }
 
     const posts = await Post.find({}).populate('user').sort({ date: -1 });
-    const likes = await User.findById(authData._id).select('likes');
+    const user = await User.findById(authData._id);
+    const likes = user.likes;
+    const scraps = user.scraps;
 
     for (let i = 0; i < posts.length; i++) {
-      if (likes.likes.includes(posts[i]._id)) {
+      if (likes.includes(posts[i]._id)) {
         posts[i]._doc.isLiked = true;
       } else {
         posts[i]._doc.isLiked = false;
+      }
+      if (scraps.includes(posts[i]._id)) {
+        posts[i]._doc.isScrapped = true;
+      } else {
+        posts[i]._doc.isScrapped = false;
       }
     }
 
