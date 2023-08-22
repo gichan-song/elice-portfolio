@@ -6,69 +6,101 @@ import bookmarkFillIcon from '../../../assets/icons/bookmark-fill-icon.svg';
 import heartIcon from '../../../assets/icons/heart-icon.svg';
 import heartFillIcon from '../../../assets/icons/heart-fill-icon.svg';
 import commentIcon from '../../../assets/icons/comment-icon.svg';
+import { useNavigate } from 'react-router-dom';
+import API from '../../../api/API';
+import ENDPOINT from './../../../api/ENDPOINT';
 
-const Post = ({ accountname }) => {
-  //
+const Post = ({ postInfo }) => {
+  const navigate = useNavigate();
 
   // 좋아요 기능
   const [isLiked, setIsLiked] = useState(false);
 
+  const handleLike = (id) => {
+    postInfo._id &&
+      API(`${ENDPOINT.POSTS}/${id}/like`, 'POST')
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+  };
+
   // 스크랩 기능
   const [isBookMarked, setIsBookMarked] = useState(false);
+
+  const handleScrap = (id) => {
+    postInfo._id &&
+      API(`${ENDPOINT.SCRAP}/${id}`, 'POST')
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => console.log(err));
+  };
+
+  // 레시피 상세 페이지 이동
+  const HandlePage = () => {
+    navigate(`/post/${postInfo._id}`);
+  };
 
   return (
     <>
       <Article>
-        <H3>
-          <ProfileImg
-            src={profileIcon}
-            alt={`${accountname}의 프로필 사진입니다.`}
-            onClick={() => {
-              console.log('프로필을 확인 기능이 들어갈 곳입니다.');
-            }}
-          />
-          <UserNameSpan
-            onClick={() => {
-              console.log('프로필을 확인 기능이 들어갈 곳입니다.');
-            }}
-          >
-            <Strong>{accountname}</Strong>님의 Recipe
-          </UserNameSpan>
-        </H3>
-        <PostContainer>
-          <PostImg src='https://source.unsplash.com/random/?food' alt='' />
-        </PostContainer>
-        <PostInfoContainer>
-          <CategoryAndTitle>
-            <Category>음식 카테고리</Category>
-            <Name>음식 이름</Name>
-          </CategoryAndTitle>
-          <PostInfo>
-            <HeartWrapper>
-              <HeartImg
-                src={isLiked ? heartFillIcon : heartIcon}
-                alt='좋아요 아이콘'
-                onClick={() => {
-                  setIsLiked((cur) => !cur);
-                }}
-              />
-              <Count>0</Count>
-            </HeartWrapper>
-            <CommentWrapper>
-              <CommentImg src={commentIcon} alt='댓글 아이콘' />
-              <Count>0</Count>
-            </CommentWrapper>
-            <BookmarkWrapper>
-              <BookmarkImg
-                src={isBookMarked ? bookmarkFillIcon : bookmarkIcon}
-                alt='스크랩'
-                onClick={() => {
-                  setIsBookMarked((cur) => !cur);
-                }}
-              />
-            </BookmarkWrapper>
-          </PostInfo>
-        </PostInfoContainer>
+        <Test>
+          <H3>
+            <ProfileImg
+              src={postInfo.user.profileImg ? postInfo.user.profileImg : profileIcon}
+              alt={`${postInfo.user.nickname}의 프로필 사진입니다.`}
+              onClick={() => {
+                console.log('프로필 확인 기능이 들어갈 곳입니다.');
+              }}
+            />
+            <UserNameSpan
+              onClick={() => {
+                console.log('프로필을 확인 기능이 들어갈 곳입니다.');
+              }}
+            >
+              <Strong>{postInfo.user.nickname}</Strong>님의 Recipe
+            </UserNameSpan>
+          </H3>
+          <PostContainer>
+            <PostImg
+              src={postInfo.thumbnail ? postInfo.thumbnail : 'https://source.unsplash.com/random/?food'}
+              alt=''
+              onClick={HandlePage}
+            />
+          </PostContainer>
+          <PostInfoContainer>
+            <CategoryAndTitle>
+              <Category>{postInfo.category}</Category>
+              <Name className='ellipsis'>{postInfo.title}</Name>
+            </CategoryAndTitle>
+            <PostInfo>
+              <HeartWrapper>
+                <HeartImg
+                  src={isLiked ? heartFillIcon : heartIcon}
+                  alt='좋아요 아이콘'
+                  onClick={() => {
+                    setIsLiked((cur) => !cur);
+                    handleLike(postInfo._id);
+                  }}
+                />
+                <Count>{postInfo.likesCount >= 0 ? postInfo.likesCount : postInfo.likes?.length}</Count>
+              </HeartWrapper>
+              <CommentWrapper>
+                <CommentImg src={commentIcon} alt='댓글 아이콘' />
+                <Count>{postInfo.commentsCount ? postInfo.commentsCount : postInfo.comments?.length}</Count>
+              </CommentWrapper>
+              <BookmarkWrapper>
+                <BookmarkImg
+                  src={isBookMarked ? bookmarkFillIcon : bookmarkIcon}
+                  alt='스크랩'
+                  onClick={() => {
+                    setIsBookMarked((cur) => !cur);
+                    handleScrap(postInfo._id);
+                  }}
+                />
+              </BookmarkWrapper>
+            </PostInfo>
+          </PostInfoContainer>
+        </Test>
       </Article>
     </>
   );
@@ -84,6 +116,12 @@ const Article = styled.article`
   border-radius: 1rem;
 `;
 
+const Test = styled.div`
+  background-color: #f8f8f8;
+  padding: 1rem;
+  border-radius: 1rem;
+`;
+
 const H3 = styled.h3`
   display: flex;
   align-items: center;
@@ -92,8 +130,10 @@ const H3 = styled.h3`
 `;
 
 const ProfileImg = styled.img`
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  object-fit: cover;
   cursor: pointer;
 `;
 
@@ -115,12 +155,14 @@ const PostContainer = styled.div`
 const PostImg = styled.img`
   border-radius: 1rem;
   aspect-ratio: 1;
+  cursor: pointer;
 `;
 
 const PostInfoContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* width: 100%; */
 `;
 
 const CategoryAndTitle = styled.div`
@@ -131,18 +173,21 @@ const CategoryAndTitle = styled.div`
 
 const Category = styled.span`
   color: var(--text-color);
+  font-size: var(--fs-xs);
 `;
 
 const Name = styled.span`
   font-size: var(--fs-xs);
   font-weight: 500;
   color: var(--text-color);
+  /* word-break: break-all; */
+  /* width: 98%; */
 `;
 
 // 좋아요 & 댓글 & 스크랩
 const PostInfo = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.6rem;
 `;
 
 // 좋아요
