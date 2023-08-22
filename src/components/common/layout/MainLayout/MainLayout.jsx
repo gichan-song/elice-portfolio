@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import Header from '../../Header/Header';
 import TabMenu from '../../TabMenu/TabMenu';
+import { mediaMaxWidth } from './../../../../styles/GlobalStyle';
 
 const MainLayout = ({ children }) => {
   return (
@@ -18,7 +19,7 @@ export default MainLayout;
 
 const MainContainer = styled.div`
   position: relative;
-  min-width: 32rem;
+  min-width: 36rem;
   max-width: 72rem;
   min-height: 100vh;
   margin: 0 auto;
@@ -33,7 +34,7 @@ const ScreenContainer = styled.div`
   padding: 3rem;
   min-width: 32rem;
 
-  @media (max-width: 360px) {
-    padding: 1.5rem;
+  @media (max-width: ${mediaMaxWidth}) {
+    padding: 2rem;
   }
 `;

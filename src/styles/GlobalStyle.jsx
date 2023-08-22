@@ -43,4 +43,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+export const mediaMaxWidth = '540px';
+
 export default GlobalStyle;

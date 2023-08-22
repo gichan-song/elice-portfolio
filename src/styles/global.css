@@ -25,6 +25,8 @@
   --text-valied-color: #019443;
 
   --border-color: #c4c4c4;
+
+  --media-max-width: 420px;
 }
 
 .ellipsis {
@@ -33,7 +35,7 @@
   display: -webkit-box;
   word-wrap: break-word;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .sr-only {
