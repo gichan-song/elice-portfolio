@@ -8,8 +8,10 @@ import plusIcon from '../../../assets/icons/plus-icon.svg';
 import plusSqureIcon from '../../../assets/icons/plus-square-icon.svg';
 import deleteIcon from '../../../assets/icons/delete-icon.svg';
 import Button from './../../../components/common/Button/Button';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API from '../../../api/API';
+import ENDPOINT from '../../../api/ENDPOINT';
+import { mediaMaxWidth } from '../../../styles/GlobalStyle';
 
 const PostUploadPage = () => {
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const PostUploadPage = () => {
     content: '',
     image: '',
   });
-  // console.log(recipeIntro);
+  console.log(recipeIntro);
 
   // 조리 순서 정보
   const [orderInfos, setOrderInfos] = useState([
@@ -139,22 +141,14 @@ const PostUploadPage = () => {
 
   // 레시피 등록하기
   const handleRegister = () => {
-    console.log('레시피 등록하기 버튼 로직이 들어갈 곳입니다.');
-    const accountname = localStorage.getItem('accountname');
-    const option = {
-      url: 'http://localhost:4000/posts',
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
-      },
-      data: {
-        recipeIntro: recipeIntro,
-        orderInfos: orderInfos,
-        accountname: accountname,
-      },
-    };
+    if (!orderInfos[0].content) {
+      return alert('하나 이상의 조리순서를 입력해 주세요.');
+    }
 
-    axios(option)
+    API(`${ENDPOINT.POSTS}`, 'POST', {
+      recipeIntro: recipeIntro,
+      orderInfos: orderInfos,
+    })
       .then((res) => {
         // 레시피 등록 성공 시
         console.log(res);
@@ -171,9 +165,19 @@ const PostUploadPage = () => {
     navigate('/');
   };
 
+  // 버튼 상태 관리
+  const [disabledButton, setDisabledButton] = useState(true);
+  useEffect(() => {
+    if (recipeIntro.category && recipeIntro.title && recipeIntro.content && recipeIntro.image) {
+      setDisabledButton(false);
+    } else {
+      setDisabledButton(true);
+    }
+  }, [recipeIntro, orderInfos]);
+
   return (
     <>
-      <MainHeadingLayout MainheadingName='레시피 작성' />
+      <MainHeadingLayout mainheadingName='레시피 작성' />
       <SubHeadingLayout subHeadingName='카테고리 선택 및 요리 소개'>
         <RecipeContainer>
           <DropDownMenu getCategory={getCategory} />
@@ -209,23 +213,25 @@ const PostUploadPage = () => {
           {orderInfos.map((orderInfo, index) => (
             <OrderInfo key={orderInfo.id}>
               <StepSpan>{`Step ${index + 1}`}</StepSpan>
-              <OrderContent
-                placeholder='조리과정에 대해 설명해 주세요.'
-                maxLength='600'
-                value={orderInfos.content}
-                onChange={(e) => {
-                  handleOrderContent(e, index);
-                }}
-              />
-              <OrderImgLabel htmlFor={`contentImage-${orderInfo.id}`} $imagePreview={orderInfo.orderImage}>
-                {orderInfo.orderImage === '' ? '' : <ImagePreview src={orderInfo.orderImage} alt='미리보기 이미지' />}
-              </OrderImgLabel>
-              <OrderImgInput
-                id={`contentImage-${orderInfo.id}`}
-                type='file'
-                accept='image/*'
-                onChange={(e) => handleImageChange(e, index)}
-              />
+              <OrderContainer>
+                <OrderContent
+                  placeholder='조리과정에 대해 설명해 주세요.'
+                  maxLength='600'
+                  value={orderInfos.content}
+                  onChange={(e) => {
+                    handleOrderContent(e, index);
+                  }}
+                />
+                <OrderImgLabel htmlFor={`contentImage-${orderInfo.id}`} $imagePreview={orderInfo.orderImage}>
+                  {orderInfo.orderImage === '' ? '' : <ImagePreview src={orderInfo.orderImage} alt='미리보기 이미지' />}
+                </OrderImgLabel>
+                <OrderImgInput
+                  id={`contentImage-${orderInfo.id}`}
+                  type='file'
+                  accept='image/*'
+                  onChange={(e) => handleImageChange(e, index)}
+                />
+              </OrderContainer>
               <DeleteImg
                 src={deleteIcon}
                 alt='삭제 아이콘'
@@ -247,7 +253,7 @@ const PostUploadPage = () => {
         <Button type='cancel' onClickHandler={handleCancel}>
           취소 하기
         </Button>
-        <Button type='register' onClickHandler={handleRegister}>
+        <Button type='register' onClickHandler={handleRegister} disabled={disabledButton}>
           레시피 등록하기
         </Button>
       </ButtonWrapper>
@@ -261,6 +267,11 @@ const RecipeContainer = styled.div`
   display: flex;
   gap: 3rem;
   width: 100%;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 `;
 
 const RecipeInputContainer = styled.div`
@@ -285,6 +296,7 @@ const InputStyles = css`
 
   &::placeholder {
     font-weight: 500;
+    color: var(--text-color);
   }
 
   &:focus {
@@ -345,6 +357,10 @@ const ImgDiv = styled.div`
   font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--text-light-color);
+
+  @media (max-width: ${mediaMaxWidth}) {
+    font-size: inherit;
+  }
 `;
 
 // [시작] 조리순서
@@ -361,20 +377,31 @@ const OrderInfo = styled.div`
   position: relative;
   gap: 1.5rem;
   width: 100%;
-  height: 14rem;
+  height: 100%;
   padding: 1.5rem;
   background: var(--sub-lighter-color);
   border-radius: 1rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    flex-direction: column;
+  }
 `;
 
 const StepSpan = styled.span`
+  white-space: nowrap;
   font-size: var(--fs-xs);
   font-weight: 700;
 `;
 
-const OrderContent = styled.textarea`
-  width: 39rem;
+const OrderContainer = styled.div`
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
   height: 100%;
+`;
+
+const OrderContent = styled.textarea`
+  width: 100%;
   resize: none;
   border: 1px solid var(--border-light-color);
   border-radius: 1rem;
@@ -386,17 +413,27 @@ const OrderContent = styled.textarea`
     outline: none;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  @media (max-width: ${mediaMaxWidth}) {
+    width: 50%;
+  }
 `;
 
 const OrderImgLabel = styled.label`
   display: block;
-  width: 100%;
-  max-width: 15rem;
+  min-width: 15rem;
   height: 11rem;
+  margin-right: 2rem;
   border-radius: 1rem;
   cursor: pointer;
   background: ${(props) => (props.$imagePreview ? '' : `url(${plusIcon})`)} var(--sub-basic-color) no-repeat center;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: ${mediaMaxWidth}) {
+    min-width: initial;
+    width: 50%;
+    margin: initial;
+  }
 `;
 
 const OrderImgInput = styled.input`
@@ -443,5 +480,11 @@ const ButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
   gap: 3rem;
-  margin-top: 2rem;
+  width: 60%;
+  height: 5rem;
+  margin: 2rem auto 0;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    height: 4.5rem;
+  }
 `;
