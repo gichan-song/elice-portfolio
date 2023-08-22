@@ -1,38 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import Post from './../../components/common/post/Post';
 import { styled } from 'styled-components';
 import CategoryMenu from './../../components/common/CategoryMenu/CategoryMenu';
 import MainHeadingLayout from './../../components/common/layout/MainHeadingLayout/MainHeadingLayout';
+import API from '../../api/API';
+import ENDPOINT from '../../api/ENDPOINT';
+import { mediaMaxWidth } from './../../styles/GlobalStyle';
 
 const HomePage = () => {
   const [selectedCategory, SetselectedCategory] = useState('전체');
-  const [posts, setPosts] = useState([]);
 
   // 선택된 카테고리 가져오기
   const getSelectedCategory = (category) => {
     SetselectedCategory(category);
   };
 
-  useEffect(() => {
-    const posts = axios.get('http://localhost:4000/posts').then((res) => {
-      setPosts(res.data);
-    });
-  }, []);
+  const [postInfo, setPostInfo] = useState('');
+  console.log(postInfo);
 
-  console.log(posts);
+  // 전체 게시물 가져오기
+  useEffect(() => {
+    if (selectedCategory === '전체') {
+      API(`${ENDPOINT.POSTS}?countperpage=999&pageno=1`, 'GET')
+        .then((res) => {
+          console.log(res);
+          setPostInfo(res.data);
+        })
+        .catch((err) => console.log(err));
+    } else {
+      API(`${ENDPOINT.POSTS}/category?category=${selectedCategory}`, 'GET')
+        .then((res) => {
+          console.log(res);
+          setPostInfo(res.data);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [selectedCategory]);
 
   return (
     <>
-      <MainHeadingLayout MainheadingName='피드' />
+      <MainHeadingLayout mainheadingName='피드' />
       <CategoryMenu getSelectedCategory={getSelectedCategory} />
-      <Container>
-        <Post accountname='test1' />
-        <Post accountname='test2' />
-        <Post accountname='test3' />
-        <Post accountname='test4' />
-        <Post accountname='test5' />
-      </Container>
+      <Container>{postInfo && postInfo.map((post) => <Post key={post._id} postInfo={post} />)}</Container>
     </>
   );
 };
@@ -44,4 +53,8 @@ const Container = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   margin-top: 2rem;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 `;
