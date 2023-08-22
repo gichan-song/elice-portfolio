@@ -88,55 +88,18 @@ router.get(
 );
 
 //로그인한 유저의 전체 레시피 목록 조회 API
-router.get(
-  '/user/:userId',
-  asynchandler(async (req, res) => {
-    const countPerPage = parseInt(req.query.countperpage) || 10;
-    const pageNo = parseInt(req.query.pageno) || 1;
-
-    const posts = await Post.find({}).populate('user').sort({ date: -1 });
-    const curr = Date.now() / 1000;
-
-    for (let i = 0; i < posts.length; i++) {
-      const diff = curr - posts[i].date / 1000;
-
-      if (diff < 60) {
-        posts[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        posts[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-      }
+router.get('/user', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    if (err) {
+      res.status(403).json({ message: 'Login required' });
+      return;
     }
 
-    if (pageNo > 0) {
-      const totalCount = posts.length;
-      let startItemNo = (pageNo - 1) * countPerPage;
-      let endItemNo = pageNo * countPerPage - 1;
+    const likes = await User.findById(authData._id).populate('likes');
 
-      if (endItemNo > totalCount - 1) {
-        endItemNo = totalCount - 1;
-      }
-      let postsPageList = [];
-      if (startItemNo < totalCount) {
-        for (let i = startItemNo; i <= endItemNo; i++) {
-          postsPageList.push(posts[i]);
-        }
-        res.json(postsPageList);
-      } else {
-        res.json(posts);
-      }
-    }
-  }),
-);
+    res.json(likes.likes);
+  });
+});
 
 //레시피 검색 조회 API
 router.get(
@@ -146,7 +109,7 @@ router.get(
     if (searchquery[0] === '?' || searchquery[0] === '=') {
       res.status(405).json({ message: 'cannot insert query including ? or = at first' });
     }
-    const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } });
+    const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } }).populate('user');
     res.json(posts);
   }),
 );
@@ -293,8 +256,9 @@ router.post('/:postId/like', verifyToken, (req, res) => {
     }
 
     post.save();
+    user.save();
 
-    res.json(post.likes);
+    res.json(user.likes);
   });
 });
 

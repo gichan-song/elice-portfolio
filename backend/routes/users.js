@@ -83,7 +83,9 @@ router.get('/profile', verifyToken, (req, res) => {
         res.status(403).json({ message: 'Login required' });
         return;
       }
-      const user = await User.findById(authData._id).populate('scraps');
+      const user = await User.findById(authData._id)
+        .populate('scraps')
+        .populate({ path: 'scraps', populate: { path: 'user' } });
 
       if (!user) {
         res.status(401).json({ message: 'User not found' });
