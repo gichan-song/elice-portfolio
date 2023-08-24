@@ -383,17 +383,17 @@ router.get('/:postId', verifyToken, (req, res) => {
       } else {
         comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
       }
+    }
 
-      if (likes.includes(post._id)) {
-        post._doc.isLiked = true;
-      } else {
-        post._doc.isLiked = false;
-      }
-      if (scraps.includes(post._id)) {
-        post._doc.isScrapped = true;
-      } else {
-        post._doc.isScrapped = false;
-      }
+    if (likes.includes(post._id)) {
+      post._doc.isLiked = true;
+    } else {
+      post._doc.isLiked = false;
+    }
+    if (scraps.includes(post._id)) {
+      post._doc.isScrapped = true;
+    } else {
+      post._doc.isScrapped = false;
     }
 
     post.comments = comments;

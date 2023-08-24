@@ -84,44 +84,50 @@ router.get('/profile/scraps', verifyToken, (req, res) => {
         return;
       }
       const scraps = await User.findById(authData._id)
+        .select('scraps -_id')
         .populate('scraps')
-        .populate({ path: 'scraps', populate: { path: 'user' } })
-        .select('scraps');
+        .populate({ path: 'scraps', populate: { path: 'user' } });
 
       if (!scraps) {
         res.status(401).json({ message: 'User not found' });
         return;
       }
 
-      const copyScraps = [...scraps._doc.scraps];
-
-      const copyScrapsUser = copyScraps.map((scrap) => {
-        return scrap.user;
-      });
-
-      const likesCount = scraps._doc.scraps.map((scrap) => {
-        return scrap.likes.length;
-      });
-
-      const commentsCount = scraps._doc.scraps.map((scrap) => {
-        return scrap.comments.length;
-      });
-      for (let i = 0; i < copyScrapsUser.length; i++) {
-        delete copyScrapsUser[i]._doc.scraps;
-        delete copyScrapsUser[i]._doc.likes;
-        delete copyScrapsUser[i]._doc.password;
-      }
-      for (let i = 0; i < copyScraps.length; i++) {
-        delete copyScraps[i]._doc.orders;
-        delete copyScraps[i]._doc.comments;
-        delete copyScraps[i]._doc.likes;
-
-        copyScraps[i]._doc.user = copyScrapsUser[i];
-        copyScraps[i]._doc.likesCount = likesCount[i];
-        copyScraps[i]._doc.commentsCount = commentsCount[i];
+      for (let i = 0; i < scraps.scraps.length; i++) {
+        delete scraps.scraps[i]._doc.orders;
+        delete scraps.scraps[i]._doc.comments;
+        delete scraps.scraps[i]._doc.likes;
       }
 
-      res.json(copyScraps);
+      // const copyScraps = [...scraps._doc.scraps];
+
+      // const copyScrapsUser = copyScraps.map((scrap) => {
+      //   return scrap.user;
+      // });
+
+      // const likesCount = scraps._doc.scraps.map((scrap) => {
+      //   return scrap.likes.length;
+      // });
+
+      // const commentsCount = scraps._doc.scraps.map((scrap) => {
+      //   return scrap.comments.length;
+      // });
+      // for (let i = 0; i < copyScrapsUser.length; i++) {
+      //   delete copyScrapsUser[i]._doc.scraps;
+      //   delete copyScrapsUser[i]._doc.likes;
+      //   delete copyScrapsUser[i]._doc.password;
+      // }
+      // for (let i = 0; i < copyScraps.length; i++) {
+      //   delete copyScraps[i]._doc.orders;
+      //   delete copyScraps[i]._doc.comments;
+      //   delete copyScraps[i]._doc.likes;
+
+      //   copyScraps[i]._doc.user = copyScrapsUser[i];
+      //   copyScraps[i]._doc.likesCount = likesCount[i];
+      //   copyScraps[i]._doc.commentsCount = commentsCount[i];
+      // }
+
+      res.json(scraps.scraps);
     }),
   );
 });
