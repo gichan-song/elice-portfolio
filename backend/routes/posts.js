@@ -56,16 +56,19 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({}).populate('user').select('-orders -comments -likes').sort({ date: -1 });
+    const posts = await Post.find({}).populate('user').select('-orders').sort({ date: -1 });
+
     const curr = Date.now() / 1000;
 
     for (let i = 0; i < posts.length; i++) {
       delete posts[i].user._doc.scraps;
       delete posts[i].user._doc.likes;
       delete posts[i].user._doc.password;
-    }
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
 
-    for (let i = 0; i < posts.length; i++) {
       const diff = curr - posts[i].date / 1000;
 
       if (diff < 60) {
@@ -120,7 +123,7 @@ router.get('/user', verifyToken, (req, res) => {
       const countPerPage = parseInt(req.query.countperpage) || 10;
       const pageNo = parseInt(req.query.pageno) || 1;
 
-      const posts = await Post.find({}).populate('user').select('-orders -comments -likes').sort({ date: -1 });
+      const posts = await Post.find({}).populate('user').select('-orders').sort({ date: -1 });
       const user = await User.findById(authData._id);
       const likes = user.likes;
       const scraps = user.scraps;
@@ -131,9 +134,11 @@ router.get('/user', verifyToken, (req, res) => {
         delete posts[i].user._doc.scraps;
         delete posts[i].user._doc.likes;
         delete posts[i].user._doc.password;
-      }
+        posts[i]._doc.likesCount = posts[i].likes.length;
+        posts[i]._doc.commentsCount = posts[i].comments.length;
+        delete posts[i]._doc.likes;
+        delete posts[i]._doc.comments;
 
-      for (let i = 0; i < posts.length; i++) {
         const diff = curr - posts[i].date / 1000;
 
         if (diff < 60) {
@@ -194,13 +199,18 @@ router.get(
       res.status(405).json({ message: 'cannot insert query including ? or = at first' });
     }
     const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } })
-      .select('-orders -comments -likes')
+      .select('-orders')
       .populate('user');
 
     for (let i = 0; i < posts.length; i++) {
       delete posts[i].user._doc.scraps;
       delete posts[i].user._doc.likes;
       delete posts[i].user._doc.password;
+
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
     }
     res.json(posts);
   }),
@@ -214,10 +224,7 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({ category: category })
-      .select('-orders -likes -comments')
-      .populate('user')
-      .sort({ createdAt: -1 });
+    const posts = await Post.find({ category: category }).select('-orders').populate('user').sort({ createdAt: -1 });
 
     const curr = Date.now() / 1000;
 
@@ -225,6 +232,10 @@ router.get(
       delete posts[i].user._doc.scraps;
       delete posts[i].user._doc.likes;
       delete posts[i].user._doc.password;
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
 
       const diff = curr - posts[i].date / 1000;
 
@@ -276,10 +287,7 @@ router.get('/category/user', verifyToken, (req, res) => {
       const countPerPage = parseInt(req.query.countperpage) || 10;
       const pageNo = parseInt(req.query.pageno) || 1;
 
-      const posts = await Post.find({ category: category })
-        .select('-orders -likes -comments')
-        .populate('user')
-        .sort({ createdAt: -1 });
+      const posts = await Post.find({ category: category }).select('-orders').populate('user').sort({ createdAt: -1 });
 
       const user = await User.findById(authData._id);
       const likes = user.likes;
@@ -290,6 +298,10 @@ router.get('/category/user', verifyToken, (req, res) => {
         delete posts[i].user._doc.scraps;
         delete posts[i].user._doc.likes;
         delete posts[i].user._doc.password;
+        posts[i]._doc.likesCount = posts[i].likes.length;
+        posts[i]._doc.commentsCount = posts[i].comments.length;
+        delete posts[i]._doc.likes;
+        delete posts[i]._doc.comments;
 
         const diff = curr - posts[i].date / 1000;
 
