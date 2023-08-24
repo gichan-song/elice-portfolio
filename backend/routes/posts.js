@@ -202,6 +202,8 @@ router.get(
       .select('-orders')
       .populate('user');
 
+    const curr = Date.now() / 1000;
+
     for (let i = 0; i < posts.length; i++) {
       delete posts[i].user._doc.scraps;
       delete posts[i].user._doc.likes;
@@ -211,10 +213,87 @@ router.get(
       posts[i]._doc.commentsCount = posts[i].comments.length;
       delete posts[i]._doc.likes;
       delete posts[i]._doc.comments;
+
+      const diff = curr - posts[i].date / 1000;
+
+      if (diff < 60) {
+        posts[i].date = `${Math.floor(diff)}초 전`;
+      } else if (diff < 3600) {
+        posts[i].date = `${Math.floor(diff / 60)}분 전`;
+      } else if (diff < 86400) {
+        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
+      } else if (diff < 604800) {
+        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
+      } else if (diff < 2592000) {
+        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
+      } else if (diff < 31536000) {
+        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
+      } else {
+        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
+      }
     }
     res.json(posts);
   }),
 );
+
+//로그인 한 유저의 레시피 검색 조회 API
+router.get('/search/user', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    const { searchquery } = req.query;
+    if (searchquery[0] === '?' || searchquery[0] === '=') {
+      res.status(405).json({ message: 'cannot insert query including ? or = at first' });
+    }
+    const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } })
+      .select('-orders')
+      .populate('user');
+
+    const curr = Date.now() / 1000;
+    const user = await User.findById(authData._id);
+    const likes = user.likes;
+    const scraps = user.scraps;
+
+    for (let i = 0; i < posts.length; i++) {
+      if (likes.includes(posts[i]._id)) {
+        posts[i]._doc.isLiked = true;
+      } else {
+        posts[i]._doc.isLiked = false;
+      }
+      if (scraps.includes(posts[i]._id)) {
+        posts[i]._doc.isScrapped = true;
+      } else {
+        posts[i]._doc.isScrapped = false;
+      }
+
+      delete posts[i].user._doc.scraps;
+      delete posts[i].user._doc.likes;
+      delete posts[i].user._doc.password;
+
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
+
+      const diff = curr - posts[i].date / 1000;
+
+      if (diff < 60) {
+        posts[i].date = `${Math.floor(diff)}초 전`;
+      } else if (diff < 3600) {
+        posts[i].date = `${Math.floor(diff / 60)}분 전`;
+      } else if (diff < 86400) {
+        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
+      } else if (diff < 604800) {
+        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
+      } else if (diff < 2592000) {
+        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
+      } else if (diff < 31536000) {
+        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
+      } else {
+        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
+      }
+    }
+    res.json(posts);
+  });
+});
 
 //카테고리별 레시피 목록 조회 API
 router.get(
