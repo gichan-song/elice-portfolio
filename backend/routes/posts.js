@@ -365,23 +365,25 @@ router.get('/:postId', verifyToken, (req, res) => {
     const likes = user.likes;
     const scraps = user.scraps;
     const curr = Date.now() / 1000;
-    for (let i = 0; i < comments.length; i++) {
-      const diff = curr - comments[i].date;
+    if (comments) {
+      for (let i = 0; i < comments.length; i++) {
+        const diff = curr - comments[i].date;
 
-      if (diff < 60) {
-        comments[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        comments[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        comments[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        comments[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        comments[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        comments[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
+        if (diff < 60) {
+          comments[i].date = `${Math.floor(diff)}초 전`;
+        } else if (diff < 3600) {
+          comments[i].date = `${Math.floor(diff / 60)}분 전`;
+        } else if (diff < 86400) {
+          comments[i].date = `${Math.floor(diff / 3600)}시간 전`;
+        } else if (diff < 604800) {
+          comments[i].date = `${Math.floor(diff / 86400)}일 전`;
+        } else if (diff < 2592000) {
+          comments[i].date = `${Math.floor(diff / 604800)}주 전`;
+        } else if (diff < 31536000) {
+          comments[i].date = `${Math.floor(diff / 2592000)}달 전`;
+        } else {
+          comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
+        }
       }
     }
 

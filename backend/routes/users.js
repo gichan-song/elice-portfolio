@@ -67,7 +67,7 @@ router.post(
       _id: user._id,
     };
 
-    jwt.sign(payload, 'secret', { expiresIn: '1h' }, (err, token) => {
+    jwt.sign(payload, 'secret', { expiresIn: '365d' }, (err, token) => {
       res.json({ token: token });
     });
   }),
@@ -84,7 +84,7 @@ router.get('/profile/scraps', verifyToken, (req, res) => {
         return;
       }
       const scraps = await User.findById(authData._id)
-        .select('scraps -_id')
+        .select('scraps likes')
         .populate('scraps')
         .populate({ path: 'scraps', populate: { path: 'user' } });
 
@@ -93,39 +93,46 @@ router.get('/profile/scraps', verifyToken, (req, res) => {
         return;
       }
 
+      const likes = scraps.likes;
+
+      const curr = Date.now() / 1000;
+
       for (let i = 0; i < scraps.scraps.length; i++) {
+        if (likes.includes(scraps.scraps[i]._id)) {
+          scraps.scraps[i]._doc.isLiked = true;
+        } else {
+          scraps.scraps[i]._doc.isLiked = false;
+        }
+        scraps.scraps[i]._doc.isScrapped = true;
+
         delete scraps.scraps[i]._doc.orders;
-        delete scraps.scraps[i]._doc.comments;
+        delete scraps.scraps[i].user._doc.scraps;
+        delete scraps.scraps[i].user._doc.likes;
+        delete scraps.scraps[i].user._doc.password;
+
+        scraps.scraps[i]._doc.likesCount = scraps.scraps[i].likes.length;
+        scraps.scraps[i]._doc.commentsCount = scraps.scraps[i].comments.length;
         delete scraps.scraps[i]._doc.likes;
+        delete scraps.scraps[i]._doc.comments;
+
+        const diff = curr - scraps.scraps[i].date / 1000;
+
+        if (diff < 60) {
+          scraps.scraps[i].date = `${Math.floor(diff)}초 전`;
+        } else if (diff < 3600) {
+          scraps.scraps[i].date = `${Math.floor(diff / 60)}분 전`;
+        } else if (diff < 86400) {
+          scraps.scraps[i].date = `${Math.floor(diff / 3600)}시간 전`;
+        } else if (diff < 604800) {
+          scraps.scraps[i].date = `${Math.floor(diff / 86400)}일 전`;
+        } else if (diff < 2592000) {
+          scraps.scraps[i].date = `${Math.floor(diff / 604800)}주 전`;
+        } else if (diff < 31536000) {
+          scraps.scraps[i].date = `${Math.floor(diff / 2592000)}달 전`;
+        } else {
+          scraps.scraps[i].date = `${Math.floor(diff / 31536000)}년 전`;
+        }
       }
-
-      // const copyScraps = [...scraps._doc.scraps];
-
-      // const copyScrapsUser = copyScraps.map((scrap) => {
-      //   return scrap.user;
-      // });
-
-      // const likesCount = scraps._doc.scraps.map((scrap) => {
-      //   return scrap.likes.length;
-      // });
-
-      // const commentsCount = scraps._doc.scraps.map((scrap) => {
-      //   return scrap.comments.length;
-      // });
-      // for (let i = 0; i < copyScrapsUser.length; i++) {
-      //   delete copyScrapsUser[i]._doc.scraps;
-      //   delete copyScrapsUser[i]._doc.likes;
-      //   delete copyScrapsUser[i]._doc.password;
-      // }
-      // for (let i = 0; i < copyScraps.length; i++) {
-      //   delete copyScraps[i]._doc.orders;
-      //   delete copyScraps[i]._doc.comments;
-      //   delete copyScraps[i]._doc.likes;
-
-      //   copyScraps[i]._doc.user = copyScrapsUser[i];
-      //   copyScraps[i]._doc.likesCount = likesCount[i];
-      //   copyScraps[i]._doc.commentsCount = commentsCount[i];
-      // }
 
       res.json(scraps.scraps);
     }),
