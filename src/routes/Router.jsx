@@ -16,6 +16,7 @@ import ProfileSettingPage from '../pages/profileSettingPage/ProfileSettingPage';
 import GuidePage from '../pages/guidePage/GuidePage';
 import SearchPage from '../pages/SearchPage/SearchPage';
 import MyScrapList from '../pages/profileSettingPage/MyScrapList/MyScrapList';
+import RandomPostPage from '../pages/RandomPostPage/RandomPostPage';
 
 const Router = () => {
   const { token } = useContext(AuthContextStore);
@@ -25,7 +26,7 @@ const Router = () => {
       <Route path='*' element={<NotFoundpage />} />
       <Route path='/notfound' element={<NotFoundpage />} />
       <Route path='/' element={<HomePage />} />
-      {/* <Route path='/test' element={<TestPage />} /> */}
+      <Route path='/random' element={<RandomPostPage />} />
 
       <Route element={<NonAuthRoute authenticated={token} />}>
         <Route path='/login' element={<LoginPage />} />
