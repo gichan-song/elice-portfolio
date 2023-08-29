@@ -70,7 +70,7 @@ const MainBtn = styled.button`
   min-width: var(--button-width);
   height: var(--button-height);
   font-size: var(--button-font-size);
-  font-weight: 700;
+  font-weight: 500;
   border-radius: 1rem;
   background-color: ${(props) => (props.$active ? 'var(--main-color)' : 'var(--button-color)')};
   color: ${(props) => (props.$active ? 'var(--text-white-color)' : 'var(--button-text-color)')};

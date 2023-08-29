@@ -41,7 +41,7 @@ const Ul = styled.nav`
 
 const Li = styled.li`
   font-size: var(--fs-md);
-  font-weight: 700;
+  font-weight: 500;
   color: ${(props) => (props.$selectedMenu ? 'var(--main-color)' : 'var(--text-color)')};
   cursor: pointer;
 
