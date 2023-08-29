@@ -105,7 +105,7 @@ router.get(
         }
         res.json(postsPageList);
       } else {
-        res.json(posts, totalCount);
+        res.json(posts);
       }
     }
   }),
@@ -185,7 +185,7 @@ router.get('/user', verifyToken, (req, res) => {
           }
           res.json(postsPageList);
         } else {
-          res.json(posts, totalCount);
+          res.json(posts);
         }
       }
     }),

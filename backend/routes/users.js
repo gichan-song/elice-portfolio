@@ -6,7 +6,7 @@ const express = require('express'),
 const User = require('../models/user');
 const Post = require('../models/Post');
 const verifyToken = require('../middlewares/verifyToken');
-const hashPassword = require('../utils/hash-password').default;
+const hashPassword = require('../utils/hash-password');
 const asynchandler = require('express-async-handler');
 
 // 회원가입 API
@@ -216,6 +216,16 @@ router.put('/profile', verifyToken, (req, res) => {
         nickname: user.nickname,
         profileImg: user.profileImg,
       });
+      const posts = await Post.find({});
+      for (let i = 0; i < posts.length; i++) {
+        for (let j = 0; j < posts[i].comments.length; j++) {
+          if (posts[i].comments[j].user_id.equals(user._id)) {
+            posts[i].comments[j].userNickname = nickname;
+            posts[i].comments[j].userProfileImg = profileImg;
+          }
+        }
+        posts[i].save();
+      }
     }),
   );
 });
