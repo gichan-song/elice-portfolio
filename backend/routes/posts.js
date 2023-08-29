@@ -58,7 +58,12 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({}).populate('user').select('-orders').sort({ date: -1 });
+    const posts = await Post.find({})
+      .skip((pageNo - 1) * countPerPage)
+      .limit(countPerPage)
+      .populate('user')
+      .select('-orders')
+      .sort({ date: -1 });
 
     const curr = Date.now() / 1000;
 
@@ -90,24 +95,7 @@ router.get(
       }
     }
 
-    if (pageNo > 0) {
-      const totalCount = posts.length;
-      let startItemNo = (pageNo - 1) * countPerPage;
-      let endItemNo = pageNo * countPerPage - 1;
-
-      if (endItemNo > totalCount - 1) {
-        endItemNo = totalCount - 1;
-      }
-      let postsPageList = [];
-      if (startItemNo < totalCount) {
-        for (let i = startItemNo; i <= endItemNo; i++) {
-          postsPageList.push(posts[i]);
-        }
-        res.json(postsPageList);
-      } else {
-        res.json(posts);
-      }
-    }
+    res.json(posts);
   }),
 );
 
@@ -125,7 +113,13 @@ router.get('/user', verifyToken, (req, res) => {
       const countPerPage = parseInt(req.query.countperpage) || 10;
       const pageNo = parseInt(req.query.pageno) || 1;
 
-      const posts = await Post.find({}).populate('user').select('-orders').sort({ date: -1 });
+      const posts = await Post.find({})
+        .skip((pageNo - 1) * countPerPage)
+        .limit(countPerPage)
+        .populate('user')
+        .select('-orders')
+        .sort({ date: -1 });
+
       const user = await User.findById(authData._id);
       const likes = user.likes;
       const scraps = user.scraps;
@@ -170,24 +164,7 @@ router.get('/user', verifyToken, (req, res) => {
         }
       }
 
-      if (pageNo > 0) {
-        const totalCount = posts.length;
-        let startItemNo = (pageNo - 1) * countPerPage;
-        let endItemNo = pageNo * countPerPage - 1;
-
-        if (endItemNo > totalCount - 1) {
-          endItemNo = totalCount - 1;
-        }
-        let postsPageList = [];
-        if (startItemNo < totalCount) {
-          for (let i = startItemNo; i <= endItemNo; i++) {
-            postsPageList.push(posts[i]);
-          }
-          res.json(postsPageList);
-        } else {
-          res.json(posts);
-        }
-      }
+      res.json(posts);
     }),
   );
 });
@@ -305,7 +282,12 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({ category: category }).select('-orders').populate('user').sort({ createdAt: -1 });
+    const posts = await Post.find({ category: category })
+      .skip((pageNo - 1) * countPerPage)
+      .limit(countPerPage)
+      .select('-orders')
+      .populate('user')
+      .sort({ createdAt: -1 });
 
     const curr = Date.now() / 1000;
 
@@ -337,24 +319,7 @@ router.get(
       }
     }
 
-    if (pageNo > 0) {
-      const totalCount = posts.length;
-      let startItemNo = (pageNo - 1) * countPerPage;
-      let endItemNo = pageNo * countPerPage - 1;
-
-      if (endItemNo > totalCount - 1) {
-        endItemNo = totalCount - 1;
-      }
-      let postsPageList = [];
-      if (startItemNo < totalCount) {
-        for (let i = startItemNo; i <= endItemNo; i++) {
-          postsPageList.push(posts[i]);
-        }
-        res.json(postsPageList);
-      } else {
-        res.json(posts);
-      }
-    }
+    res.json(posts);
   }),
 );
 
@@ -368,7 +333,12 @@ router.get('/category/user', verifyToken, (req, res) => {
       const countPerPage = parseInt(req.query.countperpage) || 10;
       const pageNo = parseInt(req.query.pageno) || 1;
 
-      const posts = await Post.find({ category: category }).select('-orders').populate('user').sort({ createdAt: -1 });
+      const posts = await Post.find({ category: category })
+        .skip((pageNo - 1) * countPerPage)
+        .limit(countPerPage)
+        .select('-orders')
+        .populate('user')
+        .sort({ createdAt: -1 });
 
       const user = await User.findById(authData._id);
       const likes = user.likes;
@@ -414,24 +384,7 @@ router.get('/category/user', verifyToken, (req, res) => {
         }
       }
 
-      if (pageNo > 0) {
-        const totalCount = posts.length;
-        let startItemNo = (pageNo - 1) * countPerPage;
-        let endItemNo = pageNo * countPerPage - 1;
-
-        if (endItemNo > totalCount - 1) {
-          endItemNo = totalCount - 1;
-        }
-        let postsPageList = [];
-        if (startItemNo < totalCount) {
-          for (let i = startItemNo; i <= endItemNo; i++) {
-            postsPageList.push(posts[i]);
-          }
-          res.json(postsPageList);
-        } else {
-          res.json(posts);
-        }
-      }
+      res.json(posts);
     }),
   );
 });
