@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Post from './../../components/common/post/Post';
 import { styled } from 'styled-components';
 import CategoryMenu from './../../components/common/CategoryMenu/CategoryMenu';
@@ -6,8 +6,11 @@ import MainHeadingLayout from './../../components/common/layout/MainHeadingLayou
 import API from '../../api/API';
 import ENDPOINT from '../../api/ENDPOINT';
 import { mediaMaxWidth } from './../../styles/GlobalStyle';
+import { AuthContextStore } from '../../context/AuthContext';
 
 const HomePage = () => {
+  const { token } = useContext(AuthContextStore);
+
   const [selectedCategory, SetselectedCategory] = useState('전체');
 
   // 선택된 카테고리 가져오기
@@ -21,7 +24,7 @@ const HomePage = () => {
   // 전체 게시물 가져오기
   useEffect(() => {
     if (selectedCategory === '전체') {
-      API(`${ENDPOINT.POSTS}?countperpage=999&pageno=1`, 'GET')
+      API(`${ENDPOINT.POSTS}${token ? '/user' : ''}?countperpage=999&pageno=1`, 'GET')
         .then((res) => {
           console.log(res);
           setPostInfo(res.data);
@@ -35,7 +38,7 @@ const HomePage = () => {
         })
         .catch((err) => console.log(err));
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, token]);
 
   return (
     <>

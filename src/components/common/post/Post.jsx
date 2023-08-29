@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { styled } from 'styled-components';
 import profileIcon from '../../../assets/icons/profile-icon.svg';
 import bookmarkIcon from '../../../assets/icons/bookmark-icon.svg';
@@ -9,12 +9,16 @@ import commentIcon from '../../../assets/icons/comment-icon.svg';
 import { useNavigate } from 'react-router-dom';
 import API from '../../../api/API';
 import ENDPOINT from './../../../api/ENDPOINT';
+import { AuthContextStore } from '../../../context/AuthContext';
 
 const Post = ({ postInfo }) => {
+  const { token } = useContext(AuthContextStore);
+
   const navigate = useNavigate();
 
   // 좋아요 기능
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(postInfo.isLiked);
+  const [likesCount, setLikesCount] = useState(postInfo.likesCount);
 
   const handleLike = (id) => {
     postInfo._id &&
@@ -24,7 +28,7 @@ const Post = ({ postInfo }) => {
   };
 
   // 스크랩 기능
-  const [isBookMarked, setIsBookMarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(postInfo.isScrapped);
 
   const handleScrap = (id) => {
     postInfo._id &&
@@ -37,7 +41,15 @@ const Post = ({ postInfo }) => {
 
   // 레시피 상세 페이지 이동
   const HandlePage = () => {
-    navigate(`/post/${postInfo._id}`);
+    if (token) {
+      navigate(`/post/${postInfo._id}`, {
+        state: {
+          postInfo: postInfo,
+        },
+      });
+    } else {
+      alert('로그인 후 이용 가능합니다.');
+    }
   };
 
   return (
@@ -57,7 +69,7 @@ const Post = ({ postInfo }) => {
                 console.log('프로필을 확인 기능이 들어갈 곳입니다.');
               }}
             >
-              <Strong>{postInfo.user.nickname}</Strong>님의 Recipe
+              <Strong>{postInfo.user.nickname}</Strong>님의 레시피
             </UserNameSpan>
           </H3>
           <PostContainer>
@@ -78,23 +90,32 @@ const Post = ({ postInfo }) => {
                   src={isLiked ? heartFillIcon : heartIcon}
                   alt='좋아요 아이콘'
                   onClick={() => {
-                    setIsLiked((cur) => !cur);
-                    handleLike(postInfo._id);
+                    if (token) {
+                      handleLike(postInfo._id);
+                      setIsLiked((cur) => !cur);
+                      setLikesCount((cur) => (isLiked ? cur - 1 : cur + 1));
+                    } else {
+                      alert('로그인 후 이용 가능합니다.');
+                    }
                   }}
                 />
-                <Count>{postInfo.likesCount >= 0 ? postInfo.likesCount : postInfo.likes?.length}</Count>
+                <Count>{likesCount}</Count>
               </HeartWrapper>
               <CommentWrapper>
                 <CommentImg src={commentIcon} alt='댓글 아이콘' />
-                <Count>{postInfo.commentsCount ? postInfo.commentsCount : postInfo.comments?.length}</Count>
+                <Count>{postInfo.commentsCount}</Count>
               </CommentWrapper>
               <BookmarkWrapper>
                 <BookmarkImg
-                  src={isBookMarked ? bookmarkFillIcon : bookmarkIcon}
+                  src={isBookmarked ? bookmarkFillIcon : bookmarkIcon}
                   alt='스크랩'
                   onClick={() => {
-                    setIsBookMarked((cur) => !cur);
-                    handleScrap(postInfo._id);
+                    if (token) {
+                      setIsBookmarked((cur) => !cur);
+                      handleScrap(postInfo._id);
+                    } else {
+                      alert('로그인 후 이용 가능합니다.');
+                    }
                   }}
                 />
               </BookmarkWrapper>
@@ -139,7 +160,7 @@ const ProfileImg = styled.img`
 
 const UserNameSpan = styled.span`
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
 `;
 
@@ -180,8 +201,7 @@ const Name = styled.span`
   font-size: var(--fs-xs);
   font-weight: 500;
   color: var(--text-color);
-  /* word-break: break-all; */
-  /* width: 98%; */
+  word-break: break-all;
 `;
 
 // 좋아요 & 댓글 & 스크랩
