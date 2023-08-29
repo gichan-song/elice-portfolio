@@ -7,8 +7,9 @@ const ENDPOINT = {
   GET_USER_SCRAPS_INFO: '/users/profile/scraps',
   EDIT_USER_PROFILE: '/users/profile',
   POSTS: '/posts',
-  SEARCH: '/posts/search',
+  SEARCH: '/posts/search/user',
   SCRAP: '/users',
+  RANDOM: '/posts/today',
 };
 
 export default ENDPOINT;
