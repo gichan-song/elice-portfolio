@@ -10,10 +10,11 @@ import { mediaMaxWidth } from '../../styles/GlobalStyle';
 const SearchPage = () => {
   const [keyword, setKeyword] = useState();
   const [searchResult, setSearchResult] = useState([]);
-  console.log(searchResult);
 
   // 디바운싱
   useEffect(() => {
+    if (keyword === '') setSearchResult([]);
+
     const delayDebounceFn = setTimeout(() => {
       keyword?.trim() &&
         API(`${ENDPOINT.SEARCH}?searchquery=${keyword}`, 'GET')
@@ -37,7 +38,7 @@ const SearchPage = () => {
     <>
       <MainHeadingLayout mainheadingName='검색' />
       <SearchContainer>
-        <SearchInput type='search' placeholder='궁금한 레시피나 유저를 검색해 보세요.' onChange={HandleChange} />
+        <SearchInput type='search' placeholder='궁금한 레시피를 검색해 보세요.' onChange={HandleChange} />
         <SearchImage
           src={searchFillIcon}
           alt='검색하기 아이콘'
