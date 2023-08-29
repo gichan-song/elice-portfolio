@@ -46,7 +46,9 @@ router.get(
       { $project: { orders: 0, comments: 0, likes: 0 } },
     ]);
 
-    res.json(randomPost);
+    const result = await Post.populate(randomPost, { path: 'user', select: '-scraps -likes -password' });
+
+    res.json(result);
   }),
 );
 //레시피 전체 목록 조회 API
