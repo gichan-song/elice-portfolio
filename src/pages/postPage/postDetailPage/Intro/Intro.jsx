@@ -14,12 +14,42 @@ import ENDPOINT from '../../../../api/ENDPOINT';
 
 const Intro = ({ postInfo }) => {
   console.log(postInfo);
+  console.log(postInfo.isLiked);
+
+  useEffect(() => {
+    if (postInfo) {
+      setLikesCount(postInfo.likes.length);
+      setIsLiked(postInfo.isLiked);
+      setIsBookmarked(postInfo.isScrapped);
+    }
+  }, [postInfo]);
 
   const navigate = useNavigate();
 
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
   const [isMyPost, setIsMyPost] = useState(false);
+
+  // 좋아요 기능
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+
+  const handleLike = (id) => {
+    postInfo._id &&
+      API(`${ENDPOINT.POSTS}/${id}/like`, 'POST')
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+  };
+
+  // 스크랩 기능
+  const [isBookmarked, setIsBookmarked] = useState();
+
+  const handleScrap = (id) => {
+    postInfo._id &&
+      API(`${ENDPOINT.SCRAP}/${id}`, 'POST')
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => console.log(err));
+  };
 
   // 자신의 게시물인지 확인
   useEffect(() => {
@@ -52,7 +82,7 @@ const Intro = ({ postInfo }) => {
                 alt='유저 프로필'
               />
               <UserName>
-                <UserNameStrong>{postInfo.user?.nickname}</UserNameStrong>님의 Recipe
+                <UserNameStrong>{postInfo.user?.nickname}</UserNameStrong>님의 레시피
               </UserName>
             </UserProfile>
             <UserAction>
@@ -60,6 +90,7 @@ const Intro = ({ postInfo }) => {
               <BookmarkBtn
                 onClick={() => {
                   setIsBookmarked((cur) => !cur);
+                  handleScrap(postInfo._id);
                 }}
               >
                 <img src={isBookmarked ? bookmarkFillIcon : bookmarkIcon} alt='' />
@@ -71,7 +102,11 @@ const Intro = ({ postInfo }) => {
               <CategoryStrong>{postInfo.category}</CategoryStrong>
               {postInfo.title}
             </TitleP>
-            <ContentP>{postInfo.recipe}</ContentP>
+            <ContentWrapper>
+              {postInfo.recipe?.split('\n').map((line, index) => (
+                <p key={index}>{line}</p>
+              ))}
+            </ContentWrapper>
             <RecipeResultContainer>
               <ResultImg src={postInfo.thumbnail ? postInfo.thumbnail : 'https://source.unsplash.com/random/?recipe'} />
               <HeartAndCommentContainer>
@@ -81,9 +116,11 @@ const Intro = ({ postInfo }) => {
                     alt='좋아요 아이콘'
                     onClick={() => {
                       setIsLiked((cur) => !cur);
+                      setLikesCount((cur) => (isLiked ? cur - 1 : cur + 1));
+                      handleLike(postInfo._id);
                     }}
                   />
-                  <Count>{postInfo.likes?.length}</Count>
+                  <Count>{likesCount}</Count>
                 </HeartWrapper>
                 <CommentWrapper>
                   <CommentImg src={commentIcon} alt='댓글 아이콘' />
@@ -121,6 +158,7 @@ const UserProfileImg = styled.img`
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 50%;
+  object-fit: cover;
   cursor: pointer;
 `;
 
@@ -142,7 +180,7 @@ const UserAction = styled.div`
 const ModifyBtn = styled.button`
   font-size: var(--fs-sm);
   color: var(--text-color);
-  font-weight: 700;
+  font-weight: 500;
   word-break: keep-all;
 `;
 
@@ -189,8 +227,8 @@ const TitleP = styled.p`
   display: flex;
   align-items: center;
   gap: 1rem;
+  word-break: break-all;
   ${ContentStyles}
-  height: 100%;
 `;
 
 // 레시피 이름
@@ -206,9 +244,15 @@ const CategoryStrong = styled.strong`
 `;
 
 // 레시피 내용
-const ContentP = styled.p`
+const ContentWrapper = styled.div`
   ${ContentStyles}
   height: 100%;
+  white-space: pre-wrap;
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
 `;
 
 // 레시피 완성 이미지 & 좋아요, 댓글 정보

@@ -13,7 +13,11 @@ const Steps = ({ postInfo }) => {
               <OrderInfo key={item._id}>
                 <StepSpan>{`STEP ${index + 1}`}</StepSpan>
                 <OrderWrapper>
-                  <OrderContent>{item.content}</OrderContent>
+                  <OrderContent>
+                    {item.content?.split('\n').map((line, index) => (
+                      <p key={index}>{line}</p>
+                    ))}
+                  </OrderContent>
                   <OrderImg
                     src={item.orderImage ? item.orderImage : 'https://source.unsplash.com/random/?food'}
                     alt={`${item.content}를 설명하는 사진입니다.`}
@@ -65,7 +69,7 @@ const OrderWrapper = styled.div`
   gap: 1.5rem;
 `;
 
-const OrderContent = styled.p`
+const OrderContent = styled.div`
   width: 100%;
   min-height: 10rem;
   border: 1px solid var(--border-light-color);
@@ -73,6 +77,12 @@ const OrderContent = styled.p`
   padding: 1rem;
   background: var(--main-bg-color);
   font-size: var(--fs-sm);
+  white-space: pre-wrap;
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
 
   @media (max-width: ${mediaMaxWidth}) {
     width: 50%;

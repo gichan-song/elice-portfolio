@@ -64,7 +64,7 @@ const MyScrapList = () => {
         </Nav>
       </Container>
       <PostContainer>
-        {postInfo ? (
+        {postInfo.length ? (
           postInfo.map((post) => <Post key={post._id} postInfo={post} />)
         ) : (
           <p>아직 스크랩한 게시물이 없습니다.</p>
