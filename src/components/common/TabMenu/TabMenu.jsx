@@ -66,7 +66,11 @@ const TabMenu = () => {
             <Li
               key={menu.name}
               onClick={() => {
-                navigate(menu.path);
+                if (!token && (menu.path === '/post' || menu.path === '/search')) {
+                  alert('로그인 후 이용 가능합니다.');
+                } else {
+                  navigate(menu.path);
+                }
               }}
             >
               <MenuImg

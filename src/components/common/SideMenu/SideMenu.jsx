@@ -27,7 +27,7 @@ const menuList = [
   },
   {
     name: '뭐 먹을까?',
-    move: '/game',
+    move: '/random',
   },
 ];
 
@@ -59,7 +59,7 @@ const SideMenu = ({ contentRef, toggle }) => {
     if (name === '내 스크랩') {
       navigate('/profile/myscrap');
     } else if (name === '뭐 먹을까?') {
-      navigate('/game');
+      navigate('/random');
     }
   };
 
