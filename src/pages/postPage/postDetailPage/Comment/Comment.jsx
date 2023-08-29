@@ -95,7 +95,7 @@ const Comment = ({ postInfo, getPostInfo }) => {
             placeholder='댓글 작성'
             onChange={HandleCommentInput}
             value={comment}
-            maxLength={600}
+            maxLength={300}
             onKeyDown={onEnterKeyDownHandler}
           />
           <Button type='comment' onClickHandler={HandleWrite}>
@@ -155,6 +155,7 @@ const DeleteImg = styled.img`
 
 const CommentContent = styled.p`
   font-size: var(--fs-sm);
+  word-break: break-all;
 `;
 
 const DateInfo = styled.span`
@@ -173,8 +174,8 @@ const CommentInput = styled.input`
   width: 100%;
   height: 4rem;
   border: 2px solid var(--border-color);
-  font-size: var(--fs-md);
-  padding: 1.5rem;
+  font-size: var(--fs-sm);
+  padding: 1.5rem 1rem;
   border-radius: 8px;
   &:focus {
     outline: none;

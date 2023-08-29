@@ -229,7 +229,7 @@ const PostEditPage = () => {
               type='text'
               id='title'
               placeholder='어떤 요리인가요? ex) 갈비찜'
-              maxLength='50'
+              maxLength='30'
               value={recipeIntro.title}
               onChange={handleRecipeIntro}
               autoFocus
