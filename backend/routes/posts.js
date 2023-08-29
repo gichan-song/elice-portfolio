@@ -6,6 +6,7 @@ const express = require('express'),
   jwt = require('jsonwebtoken');
 
 const asynchandler = require('express-async-handler');
+const timeDiff = require('../utils/time-diff');
 
 const Post = require('../models/Post');
 
@@ -77,22 +78,7 @@ router.get(
       delete posts[i]._doc.comments;
 
       const diff = curr - posts[i].date / 1000;
-
-      if (diff < 60) {
-        posts[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        posts[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-      }
+      timeDiff(diff, posts, i);
     }
 
     res.json(posts);
@@ -137,21 +123,7 @@ router.get('/user', verifyToken, (req, res) => {
 
         const diff = curr - posts[i].date / 1000;
 
-        if (diff < 60) {
-          posts[i].date = `${Math.floor(diff)}초 전`;
-        } else if (diff < 3600) {
-          posts[i].date = `${Math.floor(diff / 60)}분 전`;
-        } else if (diff < 86400) {
-          posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-        } else if (diff < 604800) {
-          posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-        } else if (diff < 2592000) {
-          posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-        } else if (diff < 31536000) {
-          posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-        } else {
-          posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-        }
+        timeDiff(diff, posts, i);
         if (likes.includes(posts[i]._id)) {
           posts[i]._doc.isLiked = true;
         } else {
@@ -195,21 +167,7 @@ router.get(
 
       const diff = curr - posts[i].date / 1000;
 
-      if (diff < 60) {
-        posts[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        posts[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-      }
+      timeDiff(diff, posts, i);
     }
     res.json(posts);
   }),
@@ -254,21 +212,7 @@ router.get('/search/user', verifyToken, (req, res) => {
 
       const diff = curr - posts[i].date / 1000;
 
-      if (diff < 60) {
-        posts[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        posts[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-      }
+      timeDiff(diff, posts, i);
     }
     res.json(posts);
   });
@@ -302,21 +246,7 @@ router.get(
 
       const diff = curr - posts[i].date / 1000;
 
-      if (diff < 60) {
-        posts[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        posts[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-      }
+      timeDiff(diff, posts, i);
     }
 
     res.json(posts);
@@ -356,21 +286,7 @@ router.get('/category/user', verifyToken, (req, res) => {
 
         const diff = curr - posts[i].date / 1000;
 
-        if (diff < 60) {
-          posts[i].date = `${Math.floor(diff)}초 전`;
-        } else if (diff < 3600) {
-          posts[i].date = `${Math.floor(diff / 60)}분 전`;
-        } else if (diff < 86400) {
-          posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-        } else if (diff < 604800) {
-          posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-        } else if (diff < 2592000) {
-          posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-        } else if (diff < 31536000) {
-          posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-        } else {
-          posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-        }
+        timeDiff(diff, posts, i);
 
         if (likes.includes(posts[i]._id)) {
           posts[i]._doc.isLiked = true;
@@ -403,21 +319,7 @@ router.get('/:postId', verifyToken, (req, res) => {
       for (let i = 0; i < comments.length; i++) {
         const diff = curr - comments[i].date;
 
-        if (diff < 60) {
-          comments[i].date = `${Math.floor(diff)}초 전`;
-        } else if (diff < 3600) {
-          comments[i].date = `${Math.floor(diff / 60)}분 전`;
-        } else if (diff < 86400) {
-          comments[i].date = `${Math.floor(diff / 3600)}시간 전`;
-        } else if (diff < 604800) {
-          comments[i].date = `${Math.floor(diff / 86400)}일 전`;
-        } else if (diff < 2592000) {
-          comments[i].date = `${Math.floor(diff / 604800)}주 전`;
-        } else if (diff < 31536000) {
-          comments[i].date = `${Math.floor(diff / 2592000)}달 전`;
-        } else {
-          comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
-        }
+        timeDiff(diff, comments, i);
       }
     }
 
