@@ -1,5 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 import reset from 'styled-reset';
+import './font.css';
 import './global.css';
 
 const GlobalStyle = createGlobalStyle`
@@ -10,6 +11,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
+    font-family: 'Spoqa Han Sans Neo', sans-serif;
     color: inherit;
     background-color: #F5F5F5;
   }
@@ -20,6 +22,7 @@ const GlobalStyle = createGlobalStyle`
   }
   
   button, input, textarea {
+    font-family: 'Spoqa Han Sans Neo', sans-serif;
     padding: 0;
     border: none;
     font-size: inherit;
