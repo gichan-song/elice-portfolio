@@ -14,6 +14,11 @@ const GlobalStyle = createGlobalStyle`
     font-family: 'Spoqa Han Sans Neo', sans-serif;
     color: inherit;
     background-color: #F5F5F5;
+    
+    overflow-y: scroll;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   a {
