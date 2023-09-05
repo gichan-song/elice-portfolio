@@ -6,29 +6,26 @@ import API from '../../api/API';
 import ENDPOINT from './../../api/ENDPOINT';
 import Post from './../../components/common/post/Post';
 import { mediaMaxWidth } from '../../styles/GlobalStyle';
+import useDebouncedValue from '../../hooks/useDebouncedValue';
 
 const SearchPage = () => {
-  const [keyword, setKeyword] = useState();
+  const [keyword, setKeyword] = useState('');
   const [searchResult, setSearchResult] = useState([]);
 
-  // 디바운싱
+  const debouncedKeyword = useDebouncedValue(keyword, 300);
+
   useEffect(() => {
-    if (keyword === '') setSearchResult([]);
+    if (debouncedKeyword === '') {
+      setSearchResult([]);
+      return;
+    }
 
-    const delayDebounceFn = setTimeout(() => {
-      keyword?.trim() &&
-        API(`${ENDPOINT.SEARCH}?searchquery=${keyword}`, 'GET')
-          .then((res) => {
-            console.log(res);
-            setSearchResult(res.data);
-          })
-          .catch((err) => console.log(err));
-
-      console.log('Searching for:', keyword);
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [keyword]);
+    API(`${ENDPOINT.SEARCH}?searchquery=${debouncedKeyword}`, 'GET')
+      .then((res) => {
+        setSearchResult(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, [debouncedKeyword]);
 
   const HandleChange = (e) => {
     setKeyword(e.target.value);
@@ -39,23 +36,18 @@ const SearchPage = () => {
       <MainHeadingLayout mainheadingName='검색' />
       <SearchContainer>
         <SearchInput type='search' placeholder='궁금한 레시피를 검색해 보세요.' onChange={HandleChange} />
-        <SearchImage
-          src={searchFillIcon}
-          alt='검색하기 아이콘'
-          onClick={() => {
-            alert('준비 중입니다.');
-          }}
-        />
+        <SearchImage src={searchFillIcon} alt='검색하기 아이콘' />
       </SearchContainer>
       <Section>
         <h3 className='sr-only'>검색 결과</h3>
-        {searchResult && searchResult.map((item) => <Post key={item._id} postInfo={item} />)}
+        {searchResult.map((item) => (
+          <Post key={item._id} postInfo={item} />
+        ))}
       </Section>
+      {searchResult.length === 0 && <DescriptionP>관련된 레시피가 없습니다.</DescriptionP>}
     </>
   );
 };
-
-export default SearchPage;
 
 const SearchContainer = styled.div`
   display: flex;
@@ -66,7 +58,7 @@ const SearchInput = styled.input`
   width: 100%;
   height: 4.5rem;
   border: 2px solid var(--main-color);
-  border-radius: 40px;
+  border-radius: 4rem;
   padding: 1rem 1.5rem;
   font-size: var(--fs-md);
 
@@ -96,13 +88,11 @@ const SearchInput = styled.input`
   }
 `;
 
-// search 아이콘 이미지로 사용하기
 const SearchImage = styled.img`
   display: inline-block;
   margin-left: -4.5rem;
   width: 3rem;
   height: 3rem;
-  cursor: pointer;
 `;
 
 const Section = styled.section`
@@ -115,3 +105,13 @@ const Section = styled.section`
     grid-template-columns: repeat(1, 1fr);
   }
 `;
+
+const DescriptionP = styled.p`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  font-size: var(--fs-md);
+  margin: 3rem 0;
+`;
+
+export default SearchPage;
