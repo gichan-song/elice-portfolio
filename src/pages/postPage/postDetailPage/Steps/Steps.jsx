@@ -2,6 +2,7 @@ import React from 'react';
 import { styled } from 'styled-components';
 import SubHeadingLayout from '../../../../components/common/layout/SubHeadingLayout/SubHeadingLayout';
 import { mediaMaxWidth } from '../../../../styles/GlobalStyle';
+import noImageIcon from '../../../../assets/icons/no-image-icon.svg';
 
 const Steps = ({ postInfo }) => {
   return (
@@ -18,10 +19,11 @@ const Steps = ({ postInfo }) => {
                       <p key={index}>{line}</p>
                     ))}
                   </OrderContent>
-                  <OrderImg
-                    src={item.orderImage ? item.orderImage : 'https://source.unsplash.com/random/?food'}
-                    alt={`${item.content}를 설명하는 사진입니다.`}
-                  />
+                  {item.orderImage ? (
+                    <OrderImg src={item.orderImage} alt={`${item.content}를 설명하는 사진입니다.`} />
+                  ) : (
+                    <NoOrderImg src={noImageIcon} alt={`${item.content}를 설명하는 사진입니다.`} />
+                  )}
                 </OrderWrapper>
               </OrderInfo>
             ))}
@@ -71,13 +73,15 @@ const OrderWrapper = styled.div`
 
 const OrderContent = styled.div`
   width: 100%;
-  min-height: 10rem;
+  max-width: 42rem;
+  height: 14rem;
   border: 1px solid var(--border-light-color);
   border-radius: 1rem;
   padding: 1rem;
   background: var(--main-bg-color);
   font-size: var(--fs-sm);
-  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-y: auto;
 
   p {
     margin: 0;
@@ -86,12 +90,14 @@ const OrderContent = styled.div`
 
   @media (max-width: ${mediaMaxWidth}) {
     width: 50%;
+    height: auto;
+    aspect-ratio: 1;
   }
 `;
 
 const OrderImg = styled.img`
   width: 14rem;
-  height: 10rem;
+
   border-radius: 1rem;
   background: var(--sub-basic-color);
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
@@ -100,6 +106,10 @@ const OrderImg = styled.img`
 
   @media (max-width: ${mediaMaxWidth}) {
     width: 50%;
-    min-height: 14rem;
   }
+`;
+
+const NoOrderImg = styled(OrderImg)`
+  padding: 5rem;
+  background-color: #fff;
 `;
