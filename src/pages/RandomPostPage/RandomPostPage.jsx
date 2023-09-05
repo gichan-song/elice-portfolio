@@ -9,7 +9,7 @@ import { mediaMaxWidth } from './../../styles/GlobalStyle';
 import { AuthContextStore } from '../../context/AuthContext';
 
 const RandomPostPage = () => {
-  const { userToken } = useContext(AuthContextStore);
+  const { token } = useContext(AuthContextStore);
 
   const navigate = useNavigate();
 
@@ -29,9 +29,9 @@ const RandomPostPage = () => {
   }, [getRandomPost]);
 
   const handleMovePage = (postId) => {
-    if (userToken) {
+    if (token) {
       navigate(`/post/${postId}`);
-    } else if (!userToken) {
+    } else if (!token) {
       alert('로그인 후 상세 레시피를 확인해 보세요!');
     }
   };
