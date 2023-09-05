@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import API from '../../../api/API';
 import ENDPOINT from './../../../api/ENDPOINT';
 import { AuthContextStore } from '../../../context/AuthContext';
+import useSnackbar from '../../../hooks/useSnackbar';
 
 const Post = ({ postInfo }) => {
   const { token } = useContext(AuthContextStore);
@@ -52,6 +53,24 @@ const Post = ({ postInfo }) => {
     }
   };
 
+  const { showSnackbar, SnackbarComponent } = useSnackbar();
+
+  const handleLikeSnackbarOpen = () => {
+    if (!isLiked) {
+      showSnackbar('좋아요를 눌렀습니다.', 3000);
+    } else if (isLiked) {
+      showSnackbar('좋아요를 해제했습니다.', 3001);
+    }
+  };
+
+  const handleScrapSnackbarOpen = () => {
+    if (!isBookmarked) {
+      showSnackbar('스크랩 되었습니다.', 3002);
+    } else if (isBookmarked) {
+      showSnackbar('스크랩이 해제되었습니다.', 3003);
+    }
+  };
+
   return (
     <>
       <Article>
@@ -60,15 +79,8 @@ const Post = ({ postInfo }) => {
             <ProfileImg
               src={postInfo.user.profileImg ? postInfo.user.profileImg : profileIcon}
               alt={`${postInfo.user.nickname}의 프로필 사진입니다.`}
-              onClick={() => {
-                console.log('프로필 확인 기능이 들어갈 곳입니다.');
-              }}
             />
-            <UserNameSpan
-              onClick={() => {
-                console.log('프로필을 확인 기능이 들어갈 곳입니다.');
-              }}
-            >
+            <UserNameSpan>
               <Strong>{postInfo.user.nickname}</Strong>님의 레시피
             </UserNameSpan>
           </H3>
@@ -76,14 +88,16 @@ const Post = ({ postInfo }) => {
             <PostImg
               src={postInfo.thumbnail ? postInfo.thumbnail : 'https://source.unsplash.com/random/?food'}
               alt=''
-              onClick={HandlePage}
             />
+            <ImgCover onClick={HandlePage}>
+              <Ul>
+                <CategoryLi>{postInfo.category}</CategoryLi>
+                <NameLi className='ellipsis'>{postInfo.title}</NameLi>
+              </Ul>
+            </ImgCover>
           </PostContainer>
           <PostInfoContainer>
-            <CategoryAndTitle>
-              <Category>{postInfo.category}</Category>
-              <Name className='ellipsis'>{postInfo.title}</Name>
-            </CategoryAndTitle>
+            <Date>{postInfo.date}</Date>
             <PostInfo>
               <HeartWrapper>
                 <HeartImg
@@ -94,6 +108,7 @@ const Post = ({ postInfo }) => {
                       handleLike(postInfo._id);
                       setIsLiked((cur) => !cur);
                       setLikesCount((cur) => (isLiked ? cur - 1 : cur + 1));
+                      handleLikeSnackbarOpen();
                     } else {
                       alert('로그인 후 이용 가능합니다.');
                     }
@@ -113,6 +128,7 @@ const Post = ({ postInfo }) => {
                     if (token) {
                       setIsBookmarked((cur) => !cur);
                       handleScrap(postInfo._id);
+                      handleScrapSnackbarOpen();
                     } else {
                       alert('로그인 후 이용 가능합니다.');
                     }
@@ -123,6 +139,7 @@ const Post = ({ postInfo }) => {
           </PostInfoContainer>
         </Test>
       </Article>
+      <SnackbarComponent />
     </>
   );
 };
@@ -135,6 +152,7 @@ const Article = styled.article`
   width: 100%;
   height: 100%;
   border-radius: 1rem;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const Test = styled.div`
@@ -151,17 +169,16 @@ const H3 = styled.h3`
 `;
 
 const ProfileImg = styled.img`
+  border: 1px solid var(--border-color);
   width: 3.6rem;
   height: 3.6rem;
   border-radius: 50%;
   object-fit: cover;
-  cursor: pointer;
 `;
 
 const UserNameSpan = styled.span`
   font-size: var(--fs-sm);
   font-weight: 500;
-  cursor: pointer;
 `;
 
 const Strong = styled.strong`
@@ -176,7 +193,39 @@ const PostContainer = styled.div`
 const PostImg = styled.img`
   border-radius: 1rem;
   aspect-ratio: 1;
+  object-fit: cover;
   cursor: pointer;
+`;
+
+const ImgCover = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  background: linear-gradient(to top, rgb(35, 35, 35, 0.6) 0%, rgba(35, 35, 35, 0) 20%);
+  cursor: pointer;
+`;
+
+const Ul = styled.ul`
+  display: flex;
+  flex-direction: column;
+  margin: 0.6rem;
+  gap: 0.4rem;
+`;
+
+const CategoryLi = styled.li`
+  color: var(--main-color);
+  font-size: var(--fs-sm);
+`;
+
+const NameLi = styled.li`
+  color: white;
+  font-size: var(--fs-sm);
+  word-break: break-all;
 `;
 
 const PostInfoContainer = styled.div`
@@ -186,22 +235,8 @@ const PostInfoContainer = styled.div`
   /* width: 100%; */
 `;
 
-const CategoryAndTitle = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-`;
-
-const Category = styled.span`
-  color: var(--text-color);
-  font-size: var(--fs-xs);
-`;
-
-const Name = styled.span`
-  font-size: var(--fs-xs);
-  font-weight: 500;
-  color: var(--text-color);
-  word-break: break-all;
+const Date = styled.span`
+  padding: 0 0.6rem;
 `;
 
 // 좋아요 & 댓글 & 스크랩

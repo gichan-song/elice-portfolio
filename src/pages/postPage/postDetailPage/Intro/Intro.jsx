@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { mediaMaxWidth } from '../../../../styles/GlobalStyle';
 import API from '../../../../api/API';
 import ENDPOINT from '../../../../api/ENDPOINT';
+import useSnackbar from '../../../../hooks/useSnackbar';
 
 const Intro = ({ postInfo }) => {
   console.log(postInfo);
@@ -71,6 +72,24 @@ const Intro = ({ postInfo }) => {
     navigate(`/post/edit/${postInfo._id}`);
   };
 
+  const { showSnackbar, SnackbarComponent } = useSnackbar();
+
+  const handleLikeSnackbarOpen = () => {
+    if (!isLiked) {
+      showSnackbar('좋아요를 눌렀습니다.', 3000);
+    } else if (isLiked) {
+      showSnackbar('좋아요를 해제했습니다.', 3001);
+    }
+  };
+
+  const handleScrapSnackbarOpen = () => {
+    if (!isBookmarked) {
+      showSnackbar('스크랩 되었습니다.', 3002);
+    } else if (isBookmarked) {
+      showSnackbar('스크랩이 해제되었습니다.', 3003);
+    }
+  };
+
   return (
     <>
       <SubHeadingLayout subHeadingName='요리 소개'>
@@ -91,6 +110,7 @@ const Intro = ({ postInfo }) => {
                 onClick={() => {
                   setIsBookmarked((cur) => !cur);
                   handleScrap(postInfo._id);
+                  handleScrapSnackbarOpen();
                 }}
               >
                 <img src={isBookmarked ? bookmarkFillIcon : bookmarkIcon} alt='' />
@@ -118,6 +138,7 @@ const Intro = ({ postInfo }) => {
                       setIsLiked((cur) => !cur);
                       setLikesCount((cur) => (isLiked ? cur - 1 : cur + 1));
                       handleLike(postInfo._id);
+                      handleLikeSnackbarOpen();
                     }}
                   />
                   <Count>{likesCount}</Count>
@@ -131,6 +152,7 @@ const Intro = ({ postInfo }) => {
           </RecipeInfoContainer>
         </RecipeContainer>
       </SubHeadingLayout>
+      <SnackbarComponent />
     </>
   );
 };
@@ -157,6 +179,7 @@ const UserProfile = styled.div`
 const UserProfileImg = styled.img`
   width: 2.4rem;
   height: 2.4rem;
+  border: 1px solid var(--border-color);
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
@@ -247,7 +270,7 @@ const CategoryStrong = styled.strong`
 const ContentWrapper = styled.div`
   ${ContentStyles}
   height: 100%;
-  white-space: pre-wrap;
+  word-break: break-all;
 
   p {
     margin: 0;
@@ -273,7 +296,7 @@ const ResultImg = styled.img`
   border-radius: 1rem;
   background: var(--sub-bg-darker-color);
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-  /* object-fit: cover;*/
+  object-fit: cover;
 
   @media (max-width: ${mediaMaxWidth}) {
     width: 100%;
