@@ -14,9 +14,6 @@ import ENDPOINT from '../../../../api/ENDPOINT';
 import useSnackbar from '../../../../hooks/useSnackbar';
 
 const Intro = ({ postInfo }) => {
-  console.log(postInfo);
-  console.log(postInfo.isLiked);
-
   useEffect(() => {
     if (postInfo) {
       setLikesCount(postInfo.likes.length);
@@ -36,7 +33,7 @@ const Intro = ({ postInfo }) => {
   const handleLike = (id) => {
     postInfo._id &&
       API(`${ENDPOINT.POSTS}/${id}/like`, 'POST')
-        .then((res) => console.log(res))
+        .then()
         .catch((err) => console.log(err));
   };
 
@@ -46,9 +43,7 @@ const Intro = ({ postInfo }) => {
   const handleScrap = (id) => {
     postInfo._id &&
       API(`${ENDPOINT.SCRAP}/${id}`, 'POST')
-        .then((res) => {
-          console.log(res);
-        })
+        .then()
         .catch((err) => console.log(err));
   };
 
@@ -57,7 +52,6 @@ const Intro = ({ postInfo }) => {
     postInfo &&
       API(`${ENDPOINT.GET_USER_INFO}`, 'GET')
         .then((res) => {
-          console.table(res.data);
           if (res.data.nickname === postInfo.user.nickname) {
             setIsMyPost(true);
           } else {
@@ -107,13 +101,14 @@ const Intro = ({ postInfo }) => {
             <UserAction>
               {isMyPost && <ModifyBtn onClick={handleModify}>수정하기</ModifyBtn>}
               <BookmarkBtn
+                type='button'
                 onClick={() => {
                   setIsBookmarked((cur) => !cur);
                   handleScrap(postInfo._id);
                   handleScrapSnackbarOpen();
                 }}
               >
-                <img src={isBookmarked ? bookmarkFillIcon : bookmarkIcon} alt='' />
+                <img src={isBookmarked ? bookmarkFillIcon : bookmarkIcon} alt='스크랩 아이콘' />
               </BookmarkBtn>
             </UserAction>
           </UserInfoContainer>
@@ -128,7 +123,10 @@ const Intro = ({ postInfo }) => {
               ))}
             </ContentWrapper>
             <RecipeResultContainer>
-              <ResultImg src={postInfo.thumbnail ? postInfo.thumbnail : 'https://source.unsplash.com/random/?recipe'} />
+              <ResultImg
+                src={postInfo.thumbnail ? postInfo.thumbnail : 'https://source.unsplash.com/random/?recipe'}
+                alt={`${postInfo.title}의 완성 이미지`}
+              />
               <HeartAndCommentContainer>
                 <HeartWrapper>
                   <HeartImg

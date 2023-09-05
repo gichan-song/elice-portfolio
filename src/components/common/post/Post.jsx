@@ -53,6 +53,7 @@ const Post = ({ postInfo }) => {
     }
   };
 
+  // 스낵바
   const { showSnackbar, SnackbarComponent } = useSnackbar();
 
   const handleLikeSnackbarOpen = () => {
@@ -117,7 +118,17 @@ const Post = ({ postInfo }) => {
                 <Count>{likesCount}</Count>
               </HeartWrapper>
               <CommentWrapper>
-                <CommentImg src={commentIcon} alt='댓글 아이콘' />
+                <CommentImg
+                  src={commentIcon}
+                  alt='댓글 아이콘'
+                  onClick={() => {
+                    if (token) {
+                      HandlePage();
+                    } else {
+                      alert('로그인 후 이용 가능합니다.');
+                    }
+                  }}
+                />
                 <Count>{postInfo.commentsCount}</Count>
               </CommentWrapper>
               <BookmarkWrapper>
@@ -232,7 +243,6 @@ const PostInfoContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* width: 100%; */
 `;
 
 const Date = styled.span`
