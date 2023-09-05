@@ -201,12 +201,12 @@ const ProfileEdit = () => {
             {...confirmPassword}
           />
         </InputContainer>
-        <Button type='join' disabled={disabledButton} onClickHandler={handleEditProfile}>
-          수정하기
-        </Button>
-        <Anchor href='/'>
-          <button>취소</button>
-        </Anchor>
+        <ButtonWrapper>
+          <Anchor href='/'>취소</Anchor>
+          <Button type='edit' disabled={disabledButton} onClickHandler={handleEditProfile}>
+            수정하기
+          </Button>
+        </ButtonWrapper>
       </Container>
     </>
   );
@@ -266,9 +266,23 @@ const InputContainer = styled.div`
   gap: 3rem;
 `;
 
+const ButtonWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  gap: 2rem;
+`;
+
 const Anchor = styled.a`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
   font-size: var(--fs-sm);
-  padding: 0.6rem;
+  border: 1px solid var(--sub-darker-color);
   border-radius: 1rem;
-  transform: translateY(-2rem);
+  text-decoration: none;
+
+  &:hover {
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+  }
 `;

@@ -97,8 +97,17 @@ const InputContainer = styled.div`
 `;
 
 const Anchor = styled.a`
-  font-size: var(--fs-sm);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 5rem;
   padding: 0.6rem;
+  font-size: var(--fs-sm);
+  border: 1px solid var(--sub-darker-color);
   border-radius: 1rem;
   transform: translateY(-2rem);
+
+  &:hover {
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+  }
 `;

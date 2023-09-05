@@ -264,14 +264,12 @@ const PostUploadPage = () => {
 export default PostUploadPage;
 
 const RecipeContainer = styled.div`
+  position: relative;
   display: flex;
-  gap: 3rem;
+  flex-direction: column;
+  gap: 1.5rem;
   width: 100%;
-
-  @media (max-width: ${mediaMaxWidth}) {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+  padding-top: 5rem;
 `;
 
 const RecipeInputContainer = styled.div`
@@ -479,10 +477,10 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 3rem;
-  width: 60%;
+  gap: 2rem;
+  padding: 0 1.2rem;
+  width: 100%;
   height: 5rem;
-  margin: 2rem auto 0;
 
   @media (max-width: ${mediaMaxWidth}) {
     height: 4.5rem;

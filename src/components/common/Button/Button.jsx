@@ -2,7 +2,7 @@ import styled, { css } from 'styled-components';
 
 const TYPES = {
   register: css`
-    --button-width: 100%;
+    --button-width: 50%;
     --button-height: 100%;
     --button-font-size: var(--fs-md);
     --button-color: var(--sub-darker-color);
@@ -13,8 +13,7 @@ const TYPES = {
     --button-height: 100%;
     --button-font-size: var(--fs-md);
     --button-color: var(--main-bg-color);
-    --button-text-color: var(--text-color);
-    --button-border-color: var(--border-color);
+    --button-border-color: var(--sub-darker-color);
   `,
   category: css`
     --button-width: 12rem;
@@ -47,6 +46,13 @@ const TYPES = {
   comment: css`
     --button-width: 8rem;
     --button-height: 4rem;
+    --button-font-size: var(--fs-sm);
+    --button-color: var(--sub-darker-color);
+    --button-text-color: var(--text-white-color);
+  `,
+  edit: css`
+    --button-width: 50%;
+    --button-height: 4.5rem;
     --button-font-size: var(--fs-sm);
     --button-color: var(--sub-darker-color);
     --button-text-color: var(--text-white-color);
