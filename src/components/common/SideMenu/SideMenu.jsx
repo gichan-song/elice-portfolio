@@ -85,7 +85,7 @@ const SideMenu = ({ contentRef, toggle }) => {
                   }}
                   $isExpanded={expandedMenu === menu.name}
                 >
-                  {menu.name}
+                  <button type='button'>{menu.name}</button>
                 </MainMenuSpan>
                 {menu.subMenu && expandedMenu === menu.name && (
                   <SubUl>

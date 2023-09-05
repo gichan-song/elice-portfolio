@@ -9,7 +9,9 @@ const Header = () => {
 
   return (
     <HeaderContainer>
-      <MenuIcon src={menuIcon} alt='' onClick={toggle} ref={targetRef} />
+      <button type='button' onClick={toggle} ref={targetRef}>
+        <MenuIcon src={menuIcon} alt='사이드 메뉴 아이콘' />
+      </button>
       <h1>
         <a href='/'>
           <LogoImg src={logo} alt='요리보고 로고' />

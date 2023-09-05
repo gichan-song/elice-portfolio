@@ -9,7 +9,7 @@ import ENDPOINT from '../../api/ENDPOINT';
 import { AuthContextStore } from '../../context/AuthContext';
 
 const LoginPage = () => {
-  const { setToken, setNickname } = useContext(AuthContextStore);
+  const { setToken } = useContext(AuthContextStore);
 
   const email = useInput('', 'login_email');
   const password = useInput('', 'login_password');
@@ -21,11 +21,9 @@ const LoginPage = () => {
       password: password.value,
     })
       .then((res) => {
-        console.log(res);
         saveUserInfo(res);
       })
       .catch((err) => {
-        console.log(err);
         if (err.response.data.message === 'User not found') {
           email.setShowValidationMessage(true);
         } else if (err.response.data.message === 'Password is incorrect') {
@@ -36,13 +34,15 @@ const LoginPage = () => {
 
   const saveUserInfo = (res) => {
     const token = res.data.token;
-    // const nickname = res.data.nickname;
-
     localStorage.setItem('token', token);
-    // localStorage.setItem('nickname', nickname);
-
     setToken(token);
-    // setNickname(nickname);
+  };
+
+  // Enter 입력 시 로그인 버튼 클릭과 동일한 효과를 주기 위한 함수
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
   };
 
   return (
@@ -56,6 +56,8 @@ const LoginPage = () => {
             id='email'
             placeholder='이메일 주소를 입력해 주세요.'
             maxLength='30'
+            onKeyDown={handleKeyDown}
+            autoFocus
             {...email}
           />
           <Input
@@ -64,6 +66,7 @@ const LoginPage = () => {
             id='password'
             placeholder='비밀번호를 입력해 주세요.'
             maxLength='14'
+            onKeyDown={handleKeyDown}
             {...password}
           />
         </InputContainer>

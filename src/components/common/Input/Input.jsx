@@ -1,7 +1,7 @@
 import React from 'react';
 import { styled } from 'styled-components';
 
-const Input = ({ labelName, type, id, placeholder, maxLength, onFocus, ...inputProps }) => {
+const Input = ({ labelName, type, id, placeholder, maxLength, onFocus, autoFocus, onKeyDown, ...inputProps }) => {
   const { value, onChange, valid, showValidationMessage, validationMessage } = inputProps;
 
   return (
@@ -18,6 +18,8 @@ const Input = ({ labelName, type, id, placeholder, maxLength, onFocus, ...inputP
           value={value}
           onChange={onChange}
           onFocus={onFocus}
+          autoFocus={autoFocus}
+          onKeyDown={onKeyDown}
         />
         {value.length !== 0 ? (
           <ValidationMessage $valid={valid}>{showValidationMessage && validationMessage}</ValidationMessage>

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import homeIcon from '../../../assets/icons/home-icon.svg';
 import homeFillIcon from '../../../assets/icons/home-fill-icon.svg';
 import uploadIcon from '../../../assets/icons/upload-icon.svg';
@@ -10,7 +10,7 @@ import userFillIcon from '../../../assets/icons/user-fill-icon.svg';
 import loginIcon from '../../../assets/icons/login-icon.svg';
 import loginFillIcon from '../../../assets/icons/login-fill-icon.svg';
 import { styled } from 'styled-components';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContextStore } from '../../../context/AuthContext';
 
 const TabMenu = () => {
@@ -18,8 +18,6 @@ const TabMenu = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  // const nickname = 'test';
 
   const MenuList = [
     {
@@ -44,7 +42,6 @@ const TabMenu = () => {
     token
       ? {
           name: '프로필',
-          // path: `/profile/${nickname}`,
           path: '/profile/edit',
           nonActive: userIcon,
           active: userFillIcon,
@@ -63,21 +60,23 @@ const TabMenu = () => {
       <Nav>
         <Ul>
           {MenuList.map((menu) => (
-            <Li
-              key={menu.name}
-              onClick={() => {
-                if (!token && (menu.path === '/post' || menu.path === '/search')) {
-                  alert('로그인 후 이용 가능합니다.');
-                } else {
-                  navigate(menu.path);
-                }
-              }}
-            >
-              <MenuImg
-                src={location.pathname === menu.path ? menu.active : menu.nonActive}
-                alt={`${menu.name} 아이콘`}
-              />
-              <MenuName $selectedMenu={location.pathname === menu.path}>{menu.name}</MenuName>
+            <Li key={menu.name}>
+              <Button
+                type='button'
+                onClick={() => {
+                  if (!token && (menu.path === '/post' || menu.path === '/search')) {
+                    alert('로그인 후 이용 가능합니다.');
+                  } else {
+                    navigate(menu.path);
+                  }
+                }}
+              >
+                <MenuImg
+                  src={location.pathname === menu.path ? menu.active : menu.nonActive}
+                  alt={`${menu.name} 아이콘`}
+                />
+                <MenuName $selectedMenu={location.pathname === menu.path}>{menu.name}</MenuName>
+              </Button>
             </Li>
           ))}
         </Ul>
@@ -100,7 +99,7 @@ const Nav = styled.nav`
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
-const Ul = styled.nav`
+const Ul = styled.ul`
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -117,6 +116,14 @@ const Li = styled.li`
   align-items: center;
   gap: 0.2rem;
   cursor: pointer;
+`;
+
+const Button = styled.button`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const MenuImg = styled.img`

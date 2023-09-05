@@ -39,7 +39,7 @@ const DropDownMenu = ({ getCategory, inititalCategory }) => {
                     toggle();
                   }}
                 >
-                  {category}
+                  <button type='button'>{category}</button>
                 </Li>
               ))}
             </Ul>
@@ -58,7 +58,6 @@ const Container = styled.div`
   left: 0;
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
   gap: 1rem;
   width: 100%;
 `;
@@ -99,7 +98,7 @@ const Ul = styled.ul`
 `;
 
 const Li = styled.li`
-  padding: 1rem;
+  padding: 0.6rem;
   font-size: var(--fs-md);
   font-weight: 700;
   color: ${(props) => (props.$active === 'true' ? 'var(--main-color)' : 'var(--text-color)')};
