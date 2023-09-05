@@ -24,14 +24,14 @@ const TYPES = {
   `,
   join: css`
     --button-width: 100%;
-    --button-height: 5rem;
+    --button-height: 4.5rem;
     --button-font-size: var(--fs-md);
     --button-color: var(--sub-darker-color);
     --button-text-color: var(--text-white-color);
   `,
   login: css`
     --button-width: 100%;
-    --button-height: 5rem;
+    --button-height: 4.5rem;
     --button-font-size: var(--fs-md);
     --button-color: var(--sub-darker-color);
     --button-text-color: var(--text-white-color);
