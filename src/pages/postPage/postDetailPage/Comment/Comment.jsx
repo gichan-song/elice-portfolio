@@ -43,7 +43,10 @@ const Comment = ({ postInfo, getPostInfo }) => {
   };
 
   const handleRemove = async (commentId) => {
-    console.log('댓글 삭제 기능이 들어갈 곳입니다.');
+    const userConfirmed = window.confirm('정말로 댓글을 삭제하시겠습니까?');
+    if (!userConfirmed) {
+      return;
+    }
 
     await API(`${ENDPOINT.POSTS}/${postInfo._id}/comments/${commentId}`, 'DELETE')
       .then((res) => {
@@ -138,6 +141,7 @@ const ProfileInfo = styled.div`
 const ProfileImg = styled.img`
   width: 2rem;
   height: 2rem;
+  border: 1px solid var(--border-color);
   border-radius: 50%;
   object-fit: cover;
 `;

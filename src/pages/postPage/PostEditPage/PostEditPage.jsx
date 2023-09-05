@@ -206,7 +206,11 @@ const PostEditPage = () => {
   };
 
   const handleRemove = () => {
-    console.log('게시물 삭제하기 로직이 들어갈 곳입니다.');
+    const userConfirmed = window.confirm('정말로 게시글을 삭제하시겠습니까?');
+    if (!userConfirmed) {
+      return;
+    }
+
     API(`${ENDPOINT.POSTS}/${params.postid}`, 'DELETE')
       .then((res) => {
         console.log(res);
@@ -315,9 +319,11 @@ const RemoveBtn = styled.button`
 `;
 
 const RecipeContainer = styled.div`
+  position: relative;
   display: flex;
   gap: 3rem;
   width: 100%;
+  padding-top: 5rem;
 
   @media (max-width: ${mediaMaxWidth}) {
     flex-direction: column;
@@ -529,10 +535,10 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 3rem;
-  width: 60%;
+  gap: 2rem;
+  width: 100%;
   height: 5rem;
-  margin: 2rem auto 0;
+  padding: 0 1.2rem;
 
   @media (max-width: ${mediaMaxWidth}) {
     height: 4.5rem;
