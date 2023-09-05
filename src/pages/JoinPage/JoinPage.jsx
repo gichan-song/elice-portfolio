@@ -61,7 +61,7 @@ const JoinPage = () => {
   useEffect(() => {
     if (email.valid && focusedInputRef.current === 'email') {
       API(`${ENDPOINT.EMAIL_DUPLICATE_CHECK}/${email.value}`, 'POST')
-        .then((res) => console.log(res))
+        .then()
         .catch((err) => {
           if (err.response.data.message === 'Id exists') {
             email.setDuplicate(true);
@@ -74,9 +74,8 @@ const JoinPage = () => {
   useEffect(() => {
     if (nickname.valid && focusedInputRef.current === 'nickname') {
       API(`${ENDPOINT.NICKNAME_DUPLICATE_CHECK}/${nickname.value}`, 'POST')
-        .then((res) => console.log(res))
+        .then()
         .catch((err) => {
-          console.log(err);
           if (err.response.data.message === 'Nickname exists') {
             nickname.setDuplicate(true);
           }
@@ -102,7 +101,6 @@ const JoinPage = () => {
       password: confirmPassword.value,
     })
       .then((res) => {
-        console.log(res);
         navigate('/login');
       })
       .catch((err) => console.log(err));

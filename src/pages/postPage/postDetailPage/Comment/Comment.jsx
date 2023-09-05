@@ -24,7 +24,6 @@ const Comment = ({ postInfo, getPostInfo }) => {
 
     await API(`${ENDPOINT.POSTS}/${postInfo._id}/comments`, 'POST', { comment: comment })
       .then((res) => {
-        console.log(res);
         setComment('');
         setTimeout(() => {
           getPostInfo();
@@ -50,7 +49,6 @@ const Comment = ({ postInfo, getPostInfo }) => {
 
     await API(`${ENDPOINT.POSTS}/${postInfo._id}/comments/${commentId}`, 'DELETE')
       .then((res) => {
-        console.log(res);
         setComment('');
         setTimeout(() => {
           getPostInfo();

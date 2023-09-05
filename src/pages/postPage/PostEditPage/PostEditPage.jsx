@@ -19,14 +19,12 @@ const PostEditPage = () => {
   const params = useParams();
 
   const [detailInfo, setDetailInfo] = useState('');
-  console.log(detailInfo);
 
   // 초기 상태 가져오기
   const getDetailInfo = useCallback(() => {
     params.postid &&
       API(`${ENDPOINT.POSTS}/${params.postid}`, 'GET')
         .then((res) => {
-          console.log(res);
           setDetailInfo(res.data);
 
           // 초기 상태
@@ -37,8 +35,6 @@ const PostEditPage = () => {
             content: res.data.recipe,
             image: res.data.thumbnail,
           }));
-
-          console.log(res.data.orders[0].content);
 
           // 조리 순서 초기 상태
           const ordersInfo = res.data.orders;
@@ -72,7 +68,6 @@ const PostEditPage = () => {
 
   // 조리 순서 정보
   const [orderInfos, setOrderInfos] = useState([]);
-  console.log(orderInfos);
 
   // 카테고리 상태 관리
   const [category, setCategory] = useState();
@@ -187,7 +182,6 @@ const PostEditPage = () => {
     })
       .then((res) => {
         // 레시피 수정 성공 시
-        console.log(res);
         navigate('/');
       })
       .catch((err) => {
@@ -201,7 +195,6 @@ const PostEditPage = () => {
 
   // 레시피 수정 취소하기
   const handleCancel = () => {
-    console.log('취소하기 로직이 들어갈 곳입니다.');
     navigate('/');
   };
 
@@ -213,7 +206,6 @@ const PostEditPage = () => {
 
     API(`${ENDPOINT.POSTS}/${params.postid}`, 'DELETE')
       .then((res) => {
-        console.log(res);
         navigate('/');
       })
       .catch((err) => console.log(err));
@@ -537,7 +529,7 @@ const ButtonWrapper = styled.div`
   align-items: center;
   gap: 2rem;
   width: 100%;
-  height: 5rem;
+  height: 4.5rem;
   padding: 0 1.2rem;
 
   @media (max-width: ${mediaMaxWidth}) {

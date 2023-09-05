@@ -11,13 +11,11 @@ const PostDetailPage = () => {
   const params = useParams();
 
   const [postInfo, setPostInfo] = useState('');
-  console.log(postInfo);
 
   // 레시피 상세 조회
   const getPostInfo = useCallback(() => {
     API(`${ENDPOINT.POSTS}/${params.postid}`, 'GET')
       .then((res) => {
-        console.log(res);
         setPostInfo(res.data);
       })
       .catch((err) => console.log(err));

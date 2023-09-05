@@ -23,7 +23,6 @@ const PostUploadPage = () => {
     content: '',
     image: '',
   });
-  console.log(recipeIntro);
 
   // 조리 순서 정보
   const [orderInfos, setOrderInfos] = useState([
@@ -33,7 +32,6 @@ const PostUploadPage = () => {
       orderImage: '',
     },
   ]);
-  console.log(orderInfos);
 
   // 카테고리 상태 관리
   const [category, setCategory] = useState();
@@ -104,7 +102,6 @@ const PostUploadPage = () => {
 
         const compressedFile = await imageCompression(file, options);
         const reader = new FileReader();
-        console.log('onloaden', reader);
         reader.onloadend = () => {
           // 완성 이미지
           if (e.target.id === 'contentImage') {
@@ -151,7 +148,6 @@ const PostUploadPage = () => {
     })
       .then((res) => {
         // 레시피 등록 성공 시
-        console.log(res);
         navigate('/');
       })
       .catch((err) => {
@@ -161,7 +157,6 @@ const PostUploadPage = () => {
 
   // 레시피 등록 취소하기
   const handleCancel = () => {
-    console.log('취소하기 로직이 들어갈 곳입니다.');
     navigate('/');
   };
 
@@ -480,7 +475,7 @@ const ButtonWrapper = styled.div`
   gap: 2rem;
   padding: 0 1.2rem;
   width: 100%;
-  height: 5rem;
+  height: 4.5rem;
 
   @media (max-width: ${mediaMaxWidth}) {
     height: 4.5rem;

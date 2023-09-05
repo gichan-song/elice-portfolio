@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// const serverURL = `${window.location.origin}`;
 const serverURL = 'http://localhost:4000';
 
 const API = async (endpoint, method, data) => {

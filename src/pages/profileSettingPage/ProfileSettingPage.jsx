@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { styled } from 'styled-components';
 import MainHeadingLayout from './../../components/common/layout/MainHeadingLayout/MainHeadingLayout';
 import Button from '../../components/common/Button/Button';
@@ -28,7 +28,7 @@ const ProfileSettingPage = () => {
         <Nav>
           <Ul>
             {categories.map((category) => (
-              <Li
+              <li
                 key={category}
                 $selectedMenu={selectedMenu === category}
                 onClick={() => {
@@ -39,7 +39,7 @@ const ProfileSettingPage = () => {
                 <Button type='category' active={selectedMenu === category}>
                   {category}
                 </Button>
-              </Li>
+              </li>
             ))}
           </Ul>
         </Nav>
@@ -66,5 +66,3 @@ const Ul = styled.nav`
   display: flex;
   gap: 2rem;
 `;
-
-const Li = styled.li``;

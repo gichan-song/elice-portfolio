@@ -19,21 +19,18 @@ const HomePage = () => {
   };
 
   const [postInfo, setPostInfo] = useState('');
-  console.log(postInfo);
 
   // 전체 게시물 가져오기
   useEffect(() => {
     if (selectedCategory === '전체') {
       API(`${ENDPOINT.POSTS}${token ? '/user' : ''}?countperpage=999&pageno=1`, 'GET')
         .then((res) => {
-          console.log(res);
           setPostInfo(res.data);
         })
         .catch((err) => console.log(err));
     } else {
       API(`${ENDPOINT.POSTS}/category?category=${selectedCategory}`, 'GET')
         .then((res) => {
-          console.log(res);
           setPostInfo(res.data);
         })
         .catch((err) => console.log(err));

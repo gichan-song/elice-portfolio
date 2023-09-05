@@ -12,7 +12,6 @@ const categories = ['프로필 수정', '내 스크랩'];
 
 const MyScrapList = () => {
   const [postInfo, setPostInfo] = useState([]);
-  // console.log(postInfo);
 
   const navigate = useNavigate();
 
@@ -30,7 +29,6 @@ const MyScrapList = () => {
   const getUserInfo = useCallback(() => {
     API(`${ENDPOINT.GET_USER_SCRAPS_INFO}`, 'GET')
       .then((res) => {
-        console.log(res);
         setPostInfo(res.data);
       })
       .catch((err) => console.log(err));

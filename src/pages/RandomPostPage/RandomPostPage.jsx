@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import API from '../../api/API';
 import ENDPOINT from '../../api/ENDPOINT';
 import MainHeadingLayout from '../../components/common/layout/MainHeadingLayout/MainHeadingLayout';
@@ -6,8 +6,11 @@ import { styled } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import questionMarkIcon from '../../assets/icons/question-mark-icon.svg';
 import { mediaMaxWidth } from './../../styles/GlobalStyle';
+import { AuthContextStore } from '../../context/AuthContext';
 
 const RandomPostPage = () => {
+  const { userToken } = useContext(AuthContextStore);
+
   const navigate = useNavigate();
 
   const [randomPost, setRandomPost] = useState();
@@ -26,7 +29,11 @@ const RandomPostPage = () => {
   }, [getRandomPost]);
 
   const handleMovePage = (postId) => {
-    navigate(`/post/${postId}`);
+    if (userToken) {
+      navigate(`/post/${postId}`);
+    } else if (!userToken) {
+      alert('로그인 후 상세 레시피를 확인해 보세요!');
+    }
   };
 
   const handlePostClick = (index) => {
@@ -70,7 +77,7 @@ const RandomPostPage = () => {
                       handlePostClick(index);
                     }}
                   >
-                    <QuestionMarkImg src={questionMarkIcon} alt='' />
+                    <QuestionMarkImg src={questionMarkIcon} alt='랜덤 레시피 카드 앞면의 물음표 이미지' />
                   </CardFront>
                 </Div>
                 <Div className='back'>
@@ -105,8 +112,9 @@ export default RandomPostPage;
 
 const DescriptionP = styled.p`
   font-size: var(--fs-md);
-  width: 90%;
+  width: 80%;
   margin: 5rem auto;
+  text-align: center;
   word-break: keep-all;
   padding: 1rem;
   background-color: #333;
@@ -225,14 +233,14 @@ const Li = styled.li`
 `;
 
 const ResetButton = styled.button`
-  width: 16%;
+  width: 10%;
   aspect-ratio: 1;
   font-size: var(--fs-md);
   font-weight: 500;
   border-radius: 50%;
   background-color: var(--main-color);
   color: var(--text-white-color);
-  margin: 6rem auto 0;
+  margin: 5rem auto 0;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
   border: none;
   cursor: pointer;

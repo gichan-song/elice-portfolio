@@ -1,7 +1,7 @@
 import GlobalStyle from './styles/GlobalStyle';
 import AuthContext from './context/AuthContext';
-import Router from './routes/Router';
 import MainLayout from './components/common/layout/MainLayout/MainLayout';
+import Router from './routes/Router';
 
 function App() {
   return (

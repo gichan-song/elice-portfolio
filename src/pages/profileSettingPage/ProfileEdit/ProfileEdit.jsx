@@ -21,7 +21,6 @@ const ProfileEdit = () => {
     const getUserInfo = () => {
       API(`${ENDPOINT.GET_USER_INFO}`, 'GET')
         .then((res) => {
-          console.log(res);
           setGetUserInfo(res.data);
           setProfileImage(res.data.profileImg);
         })
@@ -80,9 +79,8 @@ const ProfileEdit = () => {
   useEffect(() => {
     if (getUserInfo?.nickname !== nickname.value && nickname.valid && focusedInputRef.current === 'nickname') {
       API(`${ENDPOINT.NICKNAME_DUPLICATE_CHECK}/${nickname.value}`, 'POST')
-        .then((res) => console.log(res))
+        .then()
         .catch((err) => {
-          console.log(err);
           if (err.response.data.message === 'Nickname exists') {
             nickname.setDuplicate(true);
           }
@@ -108,7 +106,6 @@ const ProfileEdit = () => {
       changedpassword: confirmPassword.value ? confirmPassword.value : '',
     })
       .then((res) => {
-        console.log(res);
         alert('프로필이 수정되었습니다.');
         // window.location.reload();
         navigate('/');
