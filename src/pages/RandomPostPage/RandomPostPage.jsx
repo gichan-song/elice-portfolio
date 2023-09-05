@@ -5,12 +5,13 @@ import MainHeadingLayout from '../../components/common/layout/MainHeadingLayout/
 import { styled } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import questionMarkIcon from '../../assets/icons/question-mark-icon.svg';
+import { mediaMaxWidth } from './../../styles/GlobalStyle';
 
 const RandomPostPage = () => {
   const navigate = useNavigate();
 
   const [randomPost, setRandomPost] = useState();
-  const [clickedPostIndex, setClickedPostIndex] = useState(-1);
+  const [clickedPosts, setClickedPosts] = useState([]);
 
   const getRandomPost = useCallback(() => {
     API(`${ENDPOINT.RANDOM}`, 'GET')
@@ -29,8 +30,11 @@ const RandomPostPage = () => {
   };
 
   const handlePostClick = (index) => {
-    setClickedPostIndex(index === clickedPostIndex ? -1 : index);
-    console.log('실행');
+    if (clickedPosts.includes(index)) {
+      setClickedPosts(clickedPosts.filter((item) => item !== index));
+    } else {
+      setClickedPosts([...clickedPosts, index]);
+    }
   };
 
   useEffect(() => {
@@ -41,26 +45,33 @@ const RandomPostPage = () => {
   }, []);
 
   const handleReset = () => {
-    setClickedPostIndex(-1);
-    getRandomPost();
+    setClickedPosts([]);
+    setTimeout(() => {
+      getRandomPost();
+    }, 300);
   };
 
   return (
     <>
       <MainHeadingLayout mainheadingName='뭐 먹을까?' />
+      <DescriptionP>
+        어떤 음식을 먹을지 고민되시나요?
+        <br />
+        카드를 선택해 보세요. 다양한 레시피를 무작위로 보여드립니다!
+      </DescriptionP>
       <CardContainer className='card-container'>
         {randomPost &&
           randomPost.map((post, index) => (
             <Div className='flipper' key={post._id}>
-              <Div className='card' $clickedPostIndex={index === clickedPostIndex}>
+              <Div className='card' $clickedPostIndex={clickedPosts.includes(index)}>
                 <Div className='front'>
-                  <Test
+                  <CardFront
                     onClick={() => {
                       handlePostClick(index);
                     }}
                   >
-                    <QMarkImg src={questionMarkIcon} alt='' />
-                  </Test>
+                    <QuestionMarkImg src={questionMarkIcon} alt='' />
+                  </CardFront>
                 </Div>
                 <Div className='back'>
                   <Article>
@@ -71,8 +82,8 @@ const RandomPostPage = () => {
                       }}
                     >
                       <Ul>
-                        <Li>{post.category}</Li>
-                        <Li>{post.title}</Li>
+                        <Li className='ellipsis'>{post.category}</Li>
+                        <Li className='ellipsis'>{post.title}</Li>
                       </Ul>
                     </ImgCover>
                   </Article>
@@ -81,7 +92,7 @@ const RandomPostPage = () => {
             </Div>
           ))}
       </CardContainer>
-      {clickedPostIndex !== -1 && (
+      {clickedPosts.length !== 0 && (
         <ResetButton type='button' onClick={handleReset}>
           Reset
         </ResetButton>
@@ -92,19 +103,29 @@ const RandomPostPage = () => {
 
 export default RandomPostPage;
 
-const Test = styled.div`
-  width: 100%;
-  height: 100%;
-  background-color: var(--sub-basic-color);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+const DescriptionP = styled.p`
+  font-size: var(--fs-md);
+  width: 90%;
+  margin: 5rem auto;
+  word-break: keep-all;
+  padding: 1rem;
+  background-color: #333;
+  color: var(--text-white-color);
+  border-radius: 1rem;
+  line-height: 1.4;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+
+  @media (max-width: ${mediaMaxWidth}) {
+    margin: 4rem auto;
+    font-size: var(--fs-sm);
+    padding: 0.6rem;
+  }
 `;
 
 const Div = styled.div`
   &.flipper {
-    width: 20rem;
-    height: 20rem;
+    width: 50%;
+    aspect-ratio: 1;
     position: relative;
     perspective: 110rem;
     border-radius: 1rem;
@@ -142,19 +163,32 @@ const Div = styled.div`
 `;
 
 const CardContainer = styled.div`
+  width: 100%;
   display: flex;
   justify-content: center;
-  margin: 16rem auto 0;
+  margin: 0 auto;
   gap: 2rem;
-
   opacity: 0;
   transform: translateY(6rem);
   transition: opacity 0.8s, transform 0.8s;
+
+  @media (max-width: ${mediaMaxWidth}) {
+    gap: 1rem;
+  }
 `;
 
-const QMarkImg = styled.img`
-  width: 10rem;
-  height: 10rem;
+const CardFront = styled.div`
+  width: 100%;
+  height: 100%;
+  background-color: var(--sub-basic-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const QuestionMarkImg = styled.img`
+  width: 50%;
+  height: 50%;
 `;
 
 const Article = styled.article`
@@ -184,11 +218,15 @@ const Ul = styled.ul`
 
 const Li = styled.li`
   color: white;
+
+  &:nth-child(1) {
+    color: var(--main-color);
+  }
 `;
 
 const ResetButton = styled.button`
-  width: 8rem;
-  height: 8rem;
+  width: 16%;
+  aspect-ratio: 1;
   font-size: var(--fs-md);
   font-weight: 500;
   border-radius: 50%;
