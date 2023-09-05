@@ -6,6 +6,8 @@ const express = require('express'),
   jwt = require('jsonwebtoken');
 
 const asynchandler = require('express-async-handler');
+const timeDiff = require('../utils/time-diff');
+
 const Post = require('../models/Post');
 
 // 레시피 등록 API
@@ -36,6 +38,20 @@ router.post('/', verifyToken, (req, res) => {
   });
 });
 
+// 오늘 뭐 먹지? API
+router.get(
+  '/today',
+  asynchandler(async (req, res) => {
+    const randomPost = await Post.aggregate([
+      { $sample: { size: 3 } },
+      { $project: { orders: 0, comments: 0, likes: 0 } },
+    ]);
+
+    const result = await Post.populate(randomPost, { path: 'user', select: '-scraps -likes -password' });
+
+    res.json(result);
+  }),
+);
 //레시피 전체 목록 조회 API
 router.get(
   '/',
@@ -43,58 +59,166 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({}).populate('user').sort({ date: -1 });
+    const posts = await Post.find({})
+      .skip((pageNo - 1) * countPerPage)
+      .limit(countPerPage)
+      .populate('user')
+      .select('-orders')
+      .sort({ date: -1 });
+
     const curr = Date.now() / 1000;
 
     for (let i = 0; i < posts.length; i++) {
+      delete posts[i].user._doc.scraps;
+      delete posts[i].user._doc.likes;
+      delete posts[i].user._doc.password;
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
+
       const diff = curr - posts[i].date / 1000;
-
-      if (diff < 60) {
-        posts[i].date = `${Math.floor(diff)}초 전`;
-      } else if (diff < 3600) {
-        posts[i].date = `${Math.floor(diff / 60)}분 전`;
-      } else if (diff < 86400) {
-        posts[i].date = `${Math.floor(diff / 3600)}시간 전`;
-      } else if (diff < 604800) {
-        posts[i].date = `${Math.floor(diff / 86400)}일 전`;
-      } else if (diff < 2592000) {
-        posts[i].date = `${Math.floor(diff / 604800)}주 전`;
-      } else if (diff < 31536000) {
-        posts[i].date = `${Math.floor(diff / 2592000)}달 전`;
-      } else {
-        posts[i].date = `${Math.floor(diff / 31536000)}년 전`;
-      }
+      timeDiff(diff, posts, i);
     }
 
-    if (pageNo > 0) {
-      const totalCount = posts.length;
-      let startItemNo = (pageNo - 1) * countPerPage;
-      let endItemNo = pageNo * countPerPage - 1;
-
-      if (endItemNo > totalCount - 1) {
-        endItemNo = totalCount - 1;
-      }
-      let postsPageList = [];
-      if (startItemNo < totalCount) {
-        for (let i = startItemNo; i <= endItemNo; i++) {
-          postsPageList.push(posts[i]);
-        }
-        res.json(postsPageList);
-      } else {
-        res.json(posts);
-      }
-    }
+    res.json(posts);
   }),
 );
 
-//레시피 검색 조회 API
-router.get('/search', async (req, res) => {
-  const { searchquery } = req.query;
-  const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } });
-  res.json(posts);
+//로그인한 유저의 전체 레시피 목록 조회 API
+router.get('/user', verifyToken, (req, res) => {
+  jwt.verify(
+    req.token,
+    'secret',
+    asynchandler(async (err, authData) => {
+      if (err) {
+        res.status(403).json({ message: 'Login required' });
+        return;
+      }
+
+      const countPerPage = parseInt(req.query.countperpage) || 10;
+      const pageNo = parseInt(req.query.pageno) || 1;
+
+      const posts = await Post.find({})
+        .skip((pageNo - 1) * countPerPage)
+        .limit(countPerPage)
+        .populate('user')
+        .select('-orders')
+        .sort({ date: -1 });
+
+      const user = await User.findById(authData._id);
+      const likes = user.likes;
+      const scraps = user.scraps;
+
+      const curr = Date.now() / 1000;
+
+      for (let i = 0; i < posts.length; i++) {
+        delete posts[i].user._doc.scraps;
+        delete posts[i].user._doc.likes;
+        delete posts[i].user._doc.password;
+        posts[i]._doc.likesCount = posts[i].likes.length;
+        posts[i]._doc.commentsCount = posts[i].comments.length;
+        delete posts[i]._doc.likes;
+        delete posts[i]._doc.comments;
+
+        const diff = curr - posts[i].date / 1000;
+
+        timeDiff(diff, posts, i);
+        if (likes.includes(posts[i]._id)) {
+          posts[i]._doc.isLiked = true;
+        } else {
+          posts[i]._doc.isLiked = false;
+        }
+        if (scraps.includes(posts[i]._id)) {
+          posts[i]._doc.isScrapped = true;
+        } else {
+          posts[i]._doc.isScrapped = false;
+        }
+      }
+
+      res.json(posts);
+    }),
+  );
 });
 
-//레시피 카테고리별 조회 API
+//레시피 검색 조회 API
+router.get(
+  '/search',
+  asynchandler(async (req, res) => {
+    const { searchquery } = req.query;
+    if (searchquery[0] === '?' || searchquery[0] === '=') {
+      res.status(405).json({ message: 'cannot insert query including ? or = at first' });
+    }
+    const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } })
+      .select('-orders')
+      .populate('user');
+
+    const curr = Date.now() / 1000;
+
+    for (let i = 0; i < posts.length; i++) {
+      delete posts[i].user._doc.scraps;
+      delete posts[i].user._doc.likes;
+      delete posts[i].user._doc.password;
+
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
+
+      const diff = curr - posts[i].date / 1000;
+
+      timeDiff(diff, posts, i);
+    }
+    res.json(posts);
+  }),
+);
+
+//로그인 한 유저의 레시피 검색 조회 API
+router.get('/search/user', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    const { searchquery } = req.query;
+    if (searchquery[0] === '?' || searchquery[0] === '=') {
+      res.status(405).json({ message: 'cannot insert query including ? or = at first' });
+    }
+    const posts = await Post.find({ title: { $regex: searchquery, $options: 'i' } })
+      .select('-orders')
+      .populate('user');
+
+    const curr = Date.now() / 1000;
+    const user = await User.findById(authData._id);
+    const likes = user.likes;
+    const scraps = user.scraps;
+
+    for (let i = 0; i < posts.length; i++) {
+      if (likes.includes(posts[i]._id)) {
+        posts[i]._doc.isLiked = true;
+      } else {
+        posts[i]._doc.isLiked = false;
+      }
+      if (scraps.includes(posts[i]._id)) {
+        posts[i]._doc.isScrapped = true;
+      } else {
+        posts[i]._doc.isScrapped = false;
+      }
+
+      delete posts[i].user._doc.scraps;
+      delete posts[i].user._doc.likes;
+      delete posts[i].user._doc.password;
+
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
+
+      const diff = curr - posts[i].date / 1000;
+
+      timeDiff(diff, posts, i);
+    }
+    res.json(posts);
+  });
+});
+
+//카테고리별 레시피 목록 조회 API
 router.get(
   '/category',
   asynchandler(async (req, res) => {
@@ -102,57 +226,118 @@ router.get(
     const countPerPage = parseInt(req.query.countperpage) || 10;
     const pageNo = parseInt(req.query.pageno) || 1;
 
-    const posts = await Post.find({ category: category }).populate('user').sort({ createdAt: -1 });
+    const posts = await Post.find({ category: category })
+      .skip((pageNo - 1) * countPerPage)
+      .limit(countPerPage)
+      .select('-orders')
+      .populate('user')
+      .sort({ createdAt: -1 });
 
-    if (pageNo > 0) {
-      const totalCount = posts.length;
-      let startItemNo = (pageNo - 1) * countPerPage;
-      let endItemNo = pageNo * countPerPage - 1;
+    const curr = Date.now() / 1000;
 
-      if (endItemNo > totalCount - 1) {
-        endItemNo = totalCount - 1;
-      }
-      let postsPageList = [];
-      if (startItemNo < totalCount) {
-        for (let i = startItemNo; i <= endItemNo; i++) {
-          postsPageList.push(posts[i]);
-        }
-        res.json(postsPageList);
-      } else {
-        res.json(posts);
-      }
+    for (let i = 0; i < posts.length; i++) {
+      delete posts[i].user._doc.scraps;
+      delete posts[i].user._doc.likes;
+      delete posts[i].user._doc.password;
+      posts[i]._doc.likesCount = posts[i].likes.length;
+      posts[i]._doc.commentsCount = posts[i].comments.length;
+      delete posts[i]._doc.likes;
+      delete posts[i]._doc.comments;
+
+      const diff = curr - posts[i].date / 1000;
+
+      timeDiff(diff, posts, i);
     }
+
+    res.json(posts);
   }),
 );
 
+//로그인 한 유저의 레시피 카테고리별 조회 API
+router.get('/category/user', verifyToken, (req, res) => {
+  jwt.verify(
+    req.token,
+    'secret',
+    asynchandler(async (err, authData) => {
+      const { category } = req.query;
+      const countPerPage = parseInt(req.query.countperpage) || 10;
+      const pageNo = parseInt(req.query.pageno) || 1;
+
+      const posts = await Post.find({ category: category })
+        .skip((pageNo - 1) * countPerPage)
+        .limit(countPerPage)
+        .select('-orders')
+        .populate('user')
+        .sort({ createdAt: -1 });
+
+      const user = await User.findById(authData._id);
+      const likes = user.likes;
+      const scraps = user.scraps;
+      const curr = Date.now() / 1000;
+
+      for (let i = 0; i < posts.length; i++) {
+        delete posts[i].user._doc.scraps;
+        delete posts[i].user._doc.likes;
+        delete posts[i].user._doc.password;
+        posts[i]._doc.likesCount = posts[i].likes.length;
+        posts[i]._doc.commentsCount = posts[i].comments.length;
+        delete posts[i]._doc.likes;
+        delete posts[i]._doc.comments;
+
+        const diff = curr - posts[i].date / 1000;
+
+        timeDiff(diff, posts, i);
+
+        if (likes.includes(posts[i]._id)) {
+          posts[i]._doc.isLiked = true;
+        } else {
+          posts[i]._doc.isLiked = false;
+        }
+        if (scraps.includes(posts[i]._id)) {
+          posts[i]._doc.isScrapped = true;
+        } else {
+          posts[i]._doc.isScrapped = false;
+        }
+      }
+
+      res.json(posts);
+    }),
+  );
+});
+
 //레시피 상세 조회 API
-router.get('/:postId', async (req, res) => {
-  const { postId } = req.params;
-  const post = await Post.findOne({ _id: postId }).populate('user');
-  const comments = post.comments;
-  const curr = Date.now() / 1000;
-  for (let i = 0; i < comments.length; i++) {
-    const diff = curr - comments[i].date;
+router.get('/:postId', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secret', async (err, authData) => {
+    const { postId } = req.params;
+    const post = await Post.findById(postId).populate('user');
+    const comments = post.comments;
+    const user = await User.findById(authData._id);
+    const likes = user.likes;
+    const scraps = user.scraps;
+    const curr = Date.now() / 1000;
+    if (comments) {
+      for (let i = 0; i < comments.length; i++) {
+        const diff = curr - comments[i].date;
 
-    if (diff < 60) {
-      comments[i].date = `${Math.floor(diff)}초 전`;
-    } else if (diff < 3600) {
-      comments[i].date = `${Math.floor(diff / 60)}분 전`;
-    } else if (diff < 86400) {
-      comments[i].date = `${Math.floor(diff / 3600)}시간 전`;
-    } else if (diff < 604800) {
-      comments[i].date = `${Math.floor(diff / 86400)}일 전`;
-    } else if (diff < 2592000) {
-      comments[i].date = `${Math.floor(diff / 604800)}주 전`;
-    } else if (diff < 31536000) {
-      comments[i].date = `${Math.floor(diff / 2592000)}달 전`;
-    } else {
-      comments[i].date = `${Math.floor(diff / 31536000)}년 전`;
+        timeDiff(diff, comments, i);
+      }
     }
-  }
-  post.comments = comments;
 
-  res.json(post);
+    if (likes.includes(post._id)) {
+      post._doc.isLiked = true;
+    } else {
+      post._doc.isLiked = false;
+    }
+    if (scraps.includes(post._id)) {
+      post._doc.isScrapped = true;
+    } else {
+      post._doc.isScrapped = false;
+    }
+
+    post.comments = comments;
+
+    res.json(post);
+  });
 });
 
 //레시피 삭제 API
@@ -229,13 +414,16 @@ router.post('/:postId/like', verifyToken, (req, res) => {
     const like = post.likes.find((like) => like.user.toString() === authData._id.toString());
     if (like) {
       post.likes.pull(like._id);
+      user.likes.pull(postId);
     } else {
       post.likes.push({ user: authData._id });
+      user.likes.push(postId);
     }
 
     post.save();
+    user.save();
 
-    res.json(post.likes);
+    res.json(user.likes);
   });
 });
 
