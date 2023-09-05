@@ -20,9 +20,12 @@ const DropDownMenu = ({ getCategory, inititalCategory }) => {
   return (
     <>
       <Container>
-        <DropDownMenutButton type='button' onClick={toggle} ref={targetRef} $modalOpen={modalOpen}>
-          {dropDownMenuName}
-        </DropDownMenutButton>
+        <ButtonWrapper>
+          <DropDownMenutButton type='button' onClick={toggle} ref={targetRef} $modalOpen={modalOpen}>
+            {dropDownMenuName}
+          </DropDownMenutButton>
+          <ButtonDescription>음식 카테고리를 선택해 주세요.</ButtonDescription>
+        </ButtonWrapper>
         {modalOpen && (
           <>
             <Ul ref={contentRef}>
@@ -33,6 +36,7 @@ const DropDownMenu = ({ getCategory, inititalCategory }) => {
                   onClick={() => {
                     setSelectedCategory(category);
                     setDropDownMenuName(category);
+                    toggle();
                   }}
                 >
                   {category}
@@ -49,14 +53,25 @@ const DropDownMenu = ({ getCategory, inititalCategory }) => {
 export default DropDownMenu;
 
 const Container = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  width: 15rem;
+  /* align-items: center; */
+  gap: 1rem;
+  width: 100%;
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
 `;
 
 const DropDownMenutButton = styled.button`
-  width: 15rem;
+  min-width: 15rem;
   height: 4rem;
   font-size: var(--fs-md);
   font-weight: 700;
@@ -65,6 +80,12 @@ const DropDownMenutButton = styled.button`
     right 5% var(--main-color);
   border-radius: 1rem;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const ButtonDescription = styled.p`
+  width: 100%;
+  font-size: var(--fs-sm);
+  color: var(--text-color);
 `;
 
 const Ul = styled.ul`
